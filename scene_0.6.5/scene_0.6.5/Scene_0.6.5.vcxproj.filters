@@ -153,9 +153,6 @@
     <ClCompile Include="MyGame-Title.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MyGame-GameOver.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="MyGame-Credits.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

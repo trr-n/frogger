@@ -10,12 +10,14 @@ void MyGame::Run()
 		(this->*scene)();
 	}
 }
+
 /// @brief シーンを設定する
 /// @param $scene 変えたいシーン　例：Playなど
 void MyGame::SetScene(void(MyGame::* $scene)())
 {
 	scene = beforeScene = $scene;
 }
+
 /// @brief シーンを変える
 /// @param $scene 変えたいシーン　例：Playなど
 void MyGame::ChangeScene(void(MyGame::* $scene)())
@@ -23,6 +25,7 @@ void MyGame::ChangeScene(void(MyGame::* $scene)())
 	beforeScene = scene;	// 変える前のシーン
 	scene = $scene;	// 変えるシーン
 }
+
 /// @brief 画面更新と現在のシーンの終了チェック
 /// @return true:シーンそのまま  false:このシーンを終了する場合
 bool MyGame::Update()
@@ -38,6 +41,7 @@ bool MyGame::Update()
 	}
 	return UpdateLoop;	// ここが false だと while(Update)ループから出る
 }
+
 void MyGame::Exit()
 {
 	scene = nullptr;
