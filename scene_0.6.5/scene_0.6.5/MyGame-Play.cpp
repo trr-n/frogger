@@ -131,7 +131,6 @@ void MyGame::Play() {
 
 #pragma region copies
 
-	////Audacity で多少無音をカットして縮めた
 	//PlayOneShot jumpSound(U"sound-frogger-hop_cut.mp3");
 
 	//Texture frogger(U"frogAnimations/Frog3Col_X4_a.png");
@@ -149,7 +148,7 @@ void MyGame::Play() {
 	//	Right, RightJ
 	//};
 
-	//// 0,2,4,6 は地上の蛙パターン
+	//// 0,2,4,6
 	//int baseFrogPattern = FrogState::Up;
 
 #pragma endregion
@@ -232,9 +231,6 @@ void MyGame::Play() {
 				case 7:
 					velocity *= 8;
 					break;
-				/*case 8:
-					velocity *= 8; // xもずれてます
-					break;*/
 				default:
 					break;
 			}			
