@@ -2,9 +2,11 @@
 
 void Main()
 {
-	MyGame* myGame = new MyGame(); // メモリー生成
+	// メモリー生成
+	MyGame* myGame = new MyGame();
 
 	myGame->Run();
 
-	delete myGame; // メモリー開放
+	// メモリー開放
+	delete myGame;
 }

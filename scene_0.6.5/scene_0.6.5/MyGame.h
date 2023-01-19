@@ -57,7 +57,10 @@ private:
 	const Texture odc{ U"credits/odc.png" };
 	const Texture s3d{ U"credits/siv3d.png" };
 
-	const Audio squash{ U"sounds/sound-frogger-squash.wav" };
+	const Audio squash{ U"sounds/squash.wav" };
+	const Audio jumpSound{ U"sounds/jump.mp3" };
+	const Audio plunkSound{ U"sounds/plunk.wav" };
+	const Audio timeupSound{ U"sounds/timeup.wav" };
 
 	// かえるアニメーション
 	const Texture frogsForward{ U"frogAnimations/forward.png" };

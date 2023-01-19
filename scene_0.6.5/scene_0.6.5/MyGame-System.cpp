@@ -30,6 +30,7 @@ void MyGame::ChangeScene(void(MyGame::* $scene)())
 /// @return true:シーンそのまま  false:このシーンを終了する場合
 bool MyGame::Update()
 {
+	//if (!System60::Update())
 	if (!System::Update())
 	{
 		scene = nullptr;

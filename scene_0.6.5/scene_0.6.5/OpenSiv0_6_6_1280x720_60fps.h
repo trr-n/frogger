@@ -115,6 +115,10 @@ public:
 	{
 		System::Sleep(duration);
 	}
+
+	static void Exit() {
+		System::Exit();
+	}
 };
 /// <summary>アプリケーションの終了</summary>
 void Exit()

@@ -1,4 +1,5 @@
-﻿#include "stdafx.h"
+﻿# include "stdafx.h"
+// # include "PlayOneShot.h"
 
 class GameObject {
 public:
@@ -76,18 +77,18 @@ void MyGame::Play() {
 	Scene::SetBackground(Color(0, 0, 26));
 
 	TextureRegion frogAnims[8] = {
-		frogsForward(0, 0, Tile, Tile),
-		frogsForward(Tile, 0, Tile * 2, Tile * 2),
-		frogsBack(0, 0, Tile, Tile),
-		frogsBack(Tile, 0, Tile * 2, Tile * 2),
-		frogsLeft(0, 0, Tile, Tile),
-		frogsLeft(Tile, 0, Tile * 2, Tile * 2),
-		frogsRight(0, 0, Tile, Tile),
-		frogsRight(Tile, 0, Tile * 2, Tile * 2)
+		frogsForward(0,		0, Tile * 1, Tile),
+		frogsForward(Tile,	0, Tile * 2, Tile * 2),
+		frogsBack	(0,		0, Tile * 1, Tile),
+		frogsBack	(Tile,	0, Tile * 2, Tile * 2),
+		frogsLeft	(0,		0, Tile * 1, Tile),
+		frogsLeft	(Tile,	0, Tile * 2, Tile * 2),
+		frogsRight	(Tile,	0, Tile * 2, Tile * 2),
+		frogsRight	(0,		0, Tile * 1, Tile)
 	};
 
-	Vec2 respawn(448, 1216);
-	Vec2 frogPos(respawn);
+	Vec2 spawn(448, 1216);
+	Vec2 frogPos(spawn);
 	Vec2 frogVel(0, 0);
 	Vec2 goalPos(15, 220);
 
@@ -95,7 +96,6 @@ void MyGame::Play() {
 	Vec2 upperLeft(-128, 512);
 	Vec2 lowerRight(900, 960);
 	Vec2 lowerLeft(-128, 896);
-
 
 	const int sceneW = Scene::Width() - Tile;
 	const int sceneH = Scene::Height() - Tile * 2;
@@ -106,6 +106,7 @@ void MyGame::Play() {
 	const int car4Speed = 180;
 	const int car5Speed = 65;
 
+	// todo 増やす -------------------------------------------
 	Array<GameObject> obstructions;
 	obstructions << GameObject(car1, lowerRight, -car1Speed);
 	obstructions << GameObject(car1, Vec2(250, lowerRight.y), -car1Speed);
@@ -128,38 +129,146 @@ void MyGame::Play() {
 	turtles << Turtle(turtle, upperRight, ladderSpeed);
 	turtles << Turtle(turtle, upperRight, ladderSpeed);
 
-	double se = .3;
-	squash.setVolume(se);
+#pragma region copies
+
+	////Audacity で多少無音をカットして縮めた
+	//PlayOneShot jumpSound(U"sound-frogger-hop_cut.mp3");
+
+	//Texture frogger(U"frogAnimations/Frog3Col_X4_a.png");
+
+	//int frogWidth = frogger.width() / 8;
+	//int frogHeight = frogger.height() / 3;
+
+	//Vec2 position(Scene::Center().x, Scene::Height() - frogHeight), velocity(0, 0);
+	//Vec2 resetPos = position;
+
+	//enum FrogState {
+	//	Up, UpJ,
+	//	Left, LeftJ,
+	//	Down, DownJ,
+	//	Right, RightJ
+	//};
+
+	//// 0,2,4,6 は地上の蛙パターン
+	//int baseFrogPattern = FrogState::Up;
+
+#pragma endregion
+
+	Stopwatch sw;
+
+	const int Up = 0, Back = 2, Left = 4, Right = 6;
+	int frogPattern = Up;
+	int frogDirection = -1;
+
+
+	int move = 1;
+	int count = 0;
 
 	while (Update()) {
-		frogPos = frogVel;
-		auto forwardDown = (KeyUp | KeyW).down(),
-			leftDown = (KeyLeft | KeyA).down(),
-			backDown = (KeyDown | KeyS).down(),
-			rightDown = (KeyRight | KeyD).down();
+		if (KeySpace.down()) {
+			sw.start();
+		}
+
+		bool forwardDown = (KeyUp | KeyW).down();
+		bool leftDown = (KeyLeft | KeyA).down();
+		bool backDown = (KeyDown | KeyS).down();
+		bool rightDown = (KeyRight | KeyD).down();
 
 		// ---------------移動-------------------
-		/*if (forwardDown) frogPos.y -= Tile;*/
-		if (forwardDown) frogVel.set(0, -Tile);
-		else if (backDown) frogPos.y += Tile;
-		else if (leftDown) frogPos.x -= Tile - 10;
-		else if (rightDown) frogPos.x += Tile - 10;
-		frogPos.x >= sceneW ? frogPos.x = sceneW : false;
-		frogPos.x <= 0 ? frogPos.x = 0 : false;
-		frogPos.y >= sceneH ? frogPos.y = sceneH : false;
-		frogPos.y <= 0 ? frogPos.y = 0 : false;
 
-		Rect frogCol(frogPos.asPoint(), frogsForward.width() / 2, frogsForward.height());
+		auto MoveJump = [&](int _pattern, int _x, int _y) {
+			frogPattern = _pattern + 1;
+			frogVel.set(_x, _y);
+			jumpSound.playOneShot();
 
-		// くるま達の移動と当たり判定
+			count = 0;
+		};
+
+		// 地上か
+		if (frogPattern % 2 == 0)
+		{
+			if (forwardDown) {
+				MoveJump(Up, 0, -move);
+			}
+
+			else if (backDown) {
+				MoveJump(Back, 0, move);
+			}
+
+			else if (leftDown) {
+				MoveJump(Left, -move, 0);
+			}
+
+			else if (rightDown) {
+				MoveJump(Right, move, 0);
+			}
+		}
+		// 移動中
+		else {
+			auto velocity = frogVel;
+			switch (count) // 64
+			{
+				case 0:
+					velocity *= 8;
+					break;
+				case 1:
+					velocity *= 8;
+					break;
+				case 2:
+					velocity *= 8;
+					break;
+				case 3:
+					velocity *= 8;
+					break;
+				case 4:
+					velocity *= 8;
+					break;
+				case 5:
+					velocity *= 8;
+					break;
+				case 6:
+					velocity *= 8;
+					break;
+				case 7:
+					velocity *= 8;
+					break;
+				/*case 8:
+					velocity *= 8; // xもずれてます
+					break;*/
+				default:
+					break;
+			}			
+
+			frogPos += velocity;
+			count++;
+
+			if (count > 7) {
+				frogPattern -= 1;
+			}
+		}
+		font30(Cursor::Pos()).draw(0, 0, Palette::White);
+
+		font30(count).draw(0, font30.fontSize()*2);
+
+		frogPos.x >= sceneW ? frogPos.x = sceneW : frogPos.x;
+		frogPos.x <= 0 ? frogPos.x = 0 : frogPos.x;
+		frogPos.y >= sceneH ? frogPos.y = sceneH : frogPos.y;
+		frogPos.y <= 0 ? frogPos.y = 0 : frogPos.y;
+
+		// 横向きの画像が真中じゃないから当たり判定をど真ん中にはできない
+		Rect frogCol(frogPos.asPoint() + Point(4, 4), (frogsForward.width() / 2) - 16, frogsForward.height() - 16);
+		frogCol.draw(ColorF(Palette::Cyan, 0.25));
+
+		// くるまの移動と当たり判定
 		for (auto& i : obstructions) {
 			i.Update();
 
 			// くるま当たり判定
 			Rect obstructObjectsCollision(i.position.asPoint(), i.texture.width(), i.texture.height());
+
 			if (obstructObjectsCollision.intersects(frogCol)) {
 				squash.playOneShot();
-				frogPos = respawn;
+				frogPos = spawn;
 			}
 
 			// 画面外にでたら戻る
@@ -178,14 +287,8 @@ void MyGame::Play() {
 				frogVel.x += ladderSpeed * Scene::DeltaTime();
 			}
 
-			//isStepping = false;
-			/*
-			320 木
-			384 亀
-			448 木
-			512 木
-			576 亀
-			*/
+			if (i.position.x > 1200)
+				i.position.x = lowerLeft.x;
 		}
 
 		for (auto& i : turtles) {
@@ -194,7 +297,11 @@ void MyGame::Play() {
 			// かめ当たり判定
 			Rect turtleCol(i.position.asPoint(), i.texture.width(), i.texture.height());
 			if (turtleCol.intersects(frogCol)) {
+				Print << U"on the turtle";
 			}
+
+			if (i.position.x < -300) i.position.x = lowerRight.x;
+			if (i.position.x > 1200) i.position.x = lowerLeft.x;
 		}
 
 		// ピンクの足場の描画と当たり判定
@@ -212,50 +319,50 @@ void MyGame::Play() {
 			}
 		}
 
-		// ゴール当たり判定
-		//Rect goalFailure(goalPosition.asPoint(), goal.width(), goal.height());
-
 		Rect goalFail(goalPos.asPoint(), 80, 50);
 		if (goalFail.intersects(frogCol)) {
 			Print << U"ゴール";
 		}
-		goalFail.draw(ColorF{Palette::White, .25});
+		goalFail.draw(ColorF{ Palette::White, .25 });
 
-		// ゴールの中
-		auto goalX = 118, goalY = 253;
+		// ゴール 当たり判定
+		const int gx = 118, gy = 253;
 		for (auto i = 0; i < 5; i++) {
 			Rect goalsCol[5] = {
-				{goalX + 160 * i, goalY, 60, 60},
+				{gx + 160 * i, gy, 60, 60},
 			};
 
 			for (auto& j : goalsCol) {
 				j.draw(Palette::Red);
 			}
 		}
-		
+
 		// ---------------描画-------------------
 		// くるま
-		for (auto& c : obstructions) {
-			c.Draw();
+		for (auto& i : obstructions) {
+			i.Draw();
 		}
 
 		// まるた
-		for (auto& l : logs) {
-			l.Draw();
+		for (auto& i : logs) {
+			i.Draw();
 		}
 
 		// 亀
-		for (auto& t : turtles) {
-			t.TurtleDraw();
+		for (auto& i : turtles) {
+			i.TurtleDraw();
 		}
 
 		// ゴール
 		goal.draw(goalPos);
 
-
-		// かえる描画
-		frogAnims[0].draw(frogPos);
-
+		if (sw.isRunning() && sw.sF() < 3) {
+			Rect(frogPos.asPoint(), Tile, Tile).draw(Palette::Red);
+		}
+		else {
+			// かえる描画
+			frogAnims[frogPattern].draw(frogPos);
+		}
 
 #if _DEBUG
 

@@ -92,17 +92,17 @@ void MyGame::Credits() {
 			ChangeScene(&MyGame::Title);
 
 		odc.resized(100, 100).drawAt(160, 430);
-		s3d.resized(75, 75).drawAt(630, 430);
+		s3d.resized(75, 75).drawAt(1048, 430);
 		credit.resized(1280, 720).drawAt(Scene::Center());
 
 		int y60 = font60.fontSize(), y = y60 / 2;
 		int y30 = font30.fontSize() + 10;
 
-		auto alp = .15;
-		auto& sr = Rect{ 170, 133, 460, 60 }. draw(ColorF{ Palette::Darkcyan, alp });
-		auto& cg = Rect{ 200, 230, 400, 60 }. draw(ColorF{ Palette::Darkmagenta, alp });
+		auto alp = 0.0;
+		auto& sr = Rect{ 411, 192, 460, 60 }. draw(ColorF{ Palette::Darkcyan, alp });
+		auto& cg = Rect{ 441, 290, 400, 60 }. draw(ColorF{ Palette::Darkmagenta, alp });
 		auto& od = Rect{ 110, 380, 100, 100 }.draw(ColorF{ Palette::Darkred , alp });
-		auto& si = Rect{ 580, 380, 100, 100 }.draw(ColorF{ Palette::Darkblue, alp });
+		auto& si = Rect{ 1000, 380, 100, 100 }.draw(ColorF{ Palette::Darkblue, alp });
 
 		if (sr.leftClicked())
 			system("start chrome.exe https://spriters-resource.com");
@@ -115,7 +115,5 @@ void MyGame::Credits() {
 
 		if (si.leftClicked())
 			system("start chrome.exe https://siv3d.github.io");
-
-		font30(Cursor::Pos()).draw(0, 30);
 	}
 }
