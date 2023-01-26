@@ -43,6 +43,7 @@ private:
 	const Texture car4{ U"stageObjects/car4.png" };
 	const Texture car5{ U"stageObjects/car5.png" };
 	const Texture turtle{ U"stageObjects/turtle.png" }; // 亀 アニメーション
+	const Texture turtleAnims{ U"stageObjects/turtlePatterns.png" }; // 亀 アニメーション
 	const Texture log{ U"stageObjects/log.png" }; // 丸太
 	const Texture crocodile{ U"stageObjects/crocodile.png" }; // ワニ
 

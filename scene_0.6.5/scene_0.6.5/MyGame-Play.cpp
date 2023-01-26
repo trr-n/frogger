@@ -7,7 +7,7 @@ public:
 	Vec2 velocity;
 	Texture texture;
 
-	GameObject(Texture $tex, Vec2 $pos, int $speed)	{
+	GameObject(Texture $tex, Vec2 $pos, int $speed) {
 		texture = $tex;
 		position = $pos;
 		velocity.set($speed, 0);
@@ -55,16 +55,15 @@ public:
 		texture(drawRegion).draw(position);
 	}
 
-	int GetTurtleIndex(int _i = 5) {
+	int GetTurtleIndex(int _i = 8) {
 		int animationSpan = 500; // 1/2秒で切り替え
 		int animationIndex = (sw.ms() / animationSpan) % _i;
 
 		return animationIndex;
 	}
 
-	/// @return 沈みかけた亀なら true
-	bool IsTurtlePlunking() {
-		return 2 < GetTurtleIndex();
+	bool IsPlunking() {
+		return 6 < GetTurtleIndex();
 	}
 };
 
@@ -79,16 +78,16 @@ void MyGame::Play() {
 	TextureRegion frogAnims[8] = {
 		frogsForward(0,		0, Tile * 1, Tile),
 		frogsForward(Tile,	0, Tile * 2, Tile * 2),
-		frogsBack	(0,		0, Tile * 1, Tile),
-		frogsBack	(Tile,	0, Tile * 2, Tile * 2),
-		frogsLeft	(0,		0, Tile * 1, Tile),
-		frogsLeft	(Tile,	0, Tile * 2, Tile * 2),
-		frogsRight	(Tile,	0, Tile * 2, Tile * 2),
-		frogsRight	(0,		0, Tile * 1, Tile)
+		frogsBack(0,		0, Tile * 1, Tile),
+		frogsBack(Tile,	0, Tile * 2, Tile * 2),
+		frogsLeft(0,		0, Tile * 1, Tile),
+		frogsLeft(Tile,	0, Tile * 2, Tile * 2),
+		frogsRight(Tile,	0, Tile * 2, Tile * 2),
+		frogsRight(0,		0, Tile * 1, Tile)
 	};
 
-	Vec2 spawn(448, 1216);
-	Vec2 frogPos(spawn);
+	Vec2 frogSpawn(448, 1216);
+	Vec2 frogPos(frogSpawn);
 	Vec2 frogVel(0, 0);
 	Vec2 goalPos(15, 220);
 
@@ -106,59 +105,39 @@ void MyGame::Play() {
 	const int car4Speed = 180;
 	const int car5Speed = 65;
 
-	// todo 増やす -------------------------------------------
-	Array<GameObject> obstructions;
-	obstructions << GameObject(car1, lowerRight, -car1Speed);
-	obstructions << GameObject(car1, Vec2(250, lowerRight.y), -car1Speed);
-	obstructions << GameObject(car1, Vec2(700, lowerRight.y), -car1Speed);
-
-	obstructions << GameObject(car2, lowerLeft, car2Speed);
-
-	obstructions << GameObject(car3, lowerRight - Vec2(0, Tile * 2), -car3Speed);
-
-	obstructions << GameObject(car4, lowerLeft - Vec2(0, Tile * 2), car4Speed);
-
-	obstructions << GameObject(car5, lowerRight - Vec2(0, Tile * 4), -car5Speed);
-
+	Array<GameObject> obs;
 	Array<GameObject> logs;
-	logs << GameObject(log, upperLeft, ladderSpeed);
-	logs << GameObject(log, upperLeft - Vec2(0, Tile), ladderSpeed);
-	logs << GameObject(log, upperLeft - Vec2(0, Tile * 3), ladderSpeed);
-
 	Array<Turtle> turtles;
-	turtles << Turtle(turtle, upperRight, ladderSpeed);
-	turtles << Turtle(turtle, upperRight, ladderSpeed);
 
-#pragma region copies
+	// 車間距離 できればランダム
+	auto carSpace = Random(256, 512);
+	for (auto i = 0; i < 3; i++) {
+		obs << GameObject(car1, lowerRight - Vec2(i * carSpace, Tile * 0), -car1Speed);
+		obs << GameObject(car2, lowerLeft + Vec2(i * carSpace, Tile * 0), car2Speed);
+		obs << GameObject(car3, lowerRight - Vec2(i * carSpace, Tile * 2), -car3Speed);
+		obs << GameObject(car4, lowerLeft + Vec2(i * carSpace, -Tile * 2), car4Speed);
+		obs << GameObject(car5, lowerRight - Vec2(i * carSpace, Tile * 4), -car5Speed);
+	}
 
-	//PlayOneShot jumpSound(U"sound-frogger-hop_cut.mp3");
+	for (auto i = 0; i < 5; i++) {
+		logs << GameObject(log, upperLeft - Vec2(i * carSpace, Tile * 0), ladderSpeed);
+		logs << GameObject(log, upperLeft - Vec2(i * carSpace, Tile * 2), ladderSpeed);
+		logs << GameObject(log, upperLeft - Vec2(i * carSpace, Tile * 3), ladderSpeed);
+	}
 
-	//Texture frogger(U"frogAnimations/Frog3Col_X4_a.png");
-
-	//int frogWidth = frogger.width() / 8;
-	//int frogHeight = frogger.height() / 3;
-
-	//Vec2 position(Scene::Center().x, Scene::Height() - frogHeight), velocity(0, 0);
-	//Vec2 resetPos = position;
-
-	//enum FrogState {
-	//	Up, UpJ,
-	//	Left, LeftJ,
-	//	Down, DownJ,
-	//	Right, RightJ
-	//};
-
-	//// 0,2,4,6
-	//int baseFrogPattern = FrogState::Up;
-
-#pragma endregion
+	// 3匹セットで生成
+	for (auto i = 0; i < 5; i++) {
+		for (auto j = 0; j < 3; j++) {
+			turtles << Turtle(turtleAnims, upperRight + Vec2(Tile * j, 0), -ladderSpeed);
+			turtles << Turtle(turtleAnims, upperRight - Vec2(Tile * j, Tile * 2), -ladderSpeed);
+		}
+	}
 
 	Stopwatch sw;
 
 	const int Up = 0, Back = 2, Left = 4, Right = 6;
 	int frogPattern = Up;
 	int frogDirection = -1;
-
 
 	int move = 1;
 	int count = 0;
@@ -186,85 +165,79 @@ void MyGame::Play() {
 		// 地上か
 		if (frogPattern % 2 == 0)
 		{
-			if (forwardDown) {
+			if (forwardDown)
 				MoveJump(Up, 0, -move);
-			}
 
-			else if (backDown) {
+			else if (backDown)
 				MoveJump(Back, 0, move);
-			}
 
-			else if (leftDown) {
+			else if (leftDown)
 				MoveJump(Left, -move, 0);
-			}
 
-			else if (rightDown) {
+			else if (rightDown)
 				MoveJump(Right, move, 0);
-			}
 		}
 		// 移動中
 		else {
 			auto velocity = frogVel;
-			switch (count) // 64
+			switch (count)
 			{
-				case 0:
-					velocity *= 8;
-					break;
-				case 1:
-					velocity *= 8;
-					break;
-				case 2:
-					velocity *= 8;
-					break;
-				case 3:
-					velocity *= 8;
-					break;
-				case 4:
-					velocity *= 8;
-					break;
-				case 5:
-					velocity *= 8;
-					break;
-				case 6:
-					velocity *= 8;
-					break;
-				case 7:
-					velocity *= 8;
-					break;
-				default:
-					break;
-			}			
+			case 0:
+				velocity *= 8;
+				break;
+			case 1:
+				velocity *= 8;
+				break;
+			case 2:
+				velocity *= 8;
+				break;
+			case 3:
+				velocity *= 8;
+				break;
+			case 4:
+				velocity *= 8;
+				break;
+			case 5:
+				velocity *= 8;
+				break;
+			case 6:
+				velocity *= 8;
+				break;
+			case 7:
+				velocity *= 8;
+				break;
+			default:
+				break;
+			}
 
 			frogPos += velocity;
 			count++;
 
-			if (count > 7) {
+			if (count > 7)
 				frogPattern -= 1;
-			}
 		}
+
 		font30(Cursor::Pos()).draw(0, 0, Palette::White);
+		font30(count).draw(0, font30.fontSize() * 2);
 
-		font30(count).draw(0, font30.fontSize()*2);
-
+		// かえるが画面外にでないように
 		frogPos.x >= sceneW ? frogPos.x = sceneW : frogPos.x;
 		frogPos.x <= 0 ? frogPos.x = 0 : frogPos.x;
 		frogPos.y >= sceneH ? frogPos.y = sceneH : frogPos.y;
 		frogPos.y <= 0 ? frogPos.y = 0 : frogPos.y;
 
-		// 横向きの画像が真中じゃないから当たり判定をど真ん中にはできない
-		Rect frogCol(frogPos.asPoint() + Point(4, 4), (frogsForward.width() / 2) - 16, frogsForward.height() - 16);
+		Rect frogCol(frogPos.asPoint() + Point(16, 16), (frogsForward.width() / 2) - 32, frogsForward.height() - 32);
 		frogCol.draw(ColorF(Palette::Cyan, 0.25));
 
 		// くるまの移動と当たり判定
-		for (auto& i : obstructions) {
+		for (auto& i : obs) {
 			i.Update();
 
 			// くるま当たり判定
-			Rect obstructObjectsCollision(i.position.asPoint(), i.texture.width(), i.texture.height());
-
-			if (obstructObjectsCollision.intersects(frogCol)) {
+			Rect obstructsCol(i.position.asPoint(), i.texture.width(), i.texture.height());
+			if (obstructsCol.intersects(frogCol)) {
 				squash.playOneShot();
-				frogPos = spawn;
+				frogPos = frogSpawn;
 			}
 
 			// 画面外にでたら戻る
@@ -283,89 +256,95 @@ void MyGame::Play() {
 				frogVel.x += ladderSpeed * Scene::DeltaTime();
 			}
 
-			if (i.position.x > 1200)
-				i.position.x = lowerLeft.x;
-		}
-
-		for (auto& i : turtles) {
-			i.TurtleUpdate();
-
-			// かめ当たり判定
-			Rect turtleCol(i.position.asPoint(), i.texture.width(), i.texture.height());
-			if (turtleCol.intersects(frogCol)) {
-				Print << U"on the turtle";
-			}
-
-			if (i.position.x < -300) i.position.x = lowerRight.x;
 			if (i.position.x > 1200) i.position.x = lowerLeft.x;
 		}
 
-		// ピンクの足場の描画と当たり判定
+		// 亀
+		for (auto& i : turtles) {
+			i.TurtleUpdate();
+
+			// 当たり判定
+			Rect turtleCol(i.position.asPoint(), i.texture.width(), i.texture.height());
+			if (turtleCol.intersects(frogCol)) {
+				Print << U"on the turtle";
+
+				// 沈みかけの亀か
+				if (i.IsPlunking()) frogPos = frogSpawn;
+			}
+
+			if (i.position.x < -300) i.position.x = lowerRight.x;
+		}
+
+		// ピンクの足場
 		for (auto i = 0; i < Scene::Width(); i += Tile) {
 			Vec2 footing1(i, sceneH);
-			Vec2 footing2(i, 640);
+			Vec2 footing2(i, sceneH / 2);
 			footing.draw(i, sceneH);
 			footing.draw(i, 640);
 
-			// 足場当たり判定
+			// 当たり判定
 			Rect footing1Col(footing1.asPoint(), footing.width(), footing.height());
 			Rect footing2Col(footing2.asPoint(), footing.width(), footing.height());
 			if (footing1Col.intersects(frogPos) || footing2Col.intersects(frogPos)) {
 				Print << U"on the pinkies";
 			}
-		}
 
-		Rect goalFail(goalPos.asPoint(), 80, 50);
-		if (goalFail.intersects(frogCol)) {
-			Print << U"ゴール";
-		}
-		goalFail.draw(ColorF{ Palette::White, .25 });
-
-		// ゴール 当たり判定
-		const int gx = 118, gy = 253;
-		for (auto i = 0; i < 5; i++) {
-			Rect goalsCol[5] = {
-				{gx + 160 * i, gy, 60, 60},
-			};
-
-			for (auto& j : goalsCol) {
-				j.draw(Palette::Red);
+			// ゴールのフレーム
+			Rect goalFrame(goalPos.asPoint(), 80, 50);
+			if (goalFrame.intersects(frogCol)) {
+				Print << U"ゴール";
 			}
-		}
 
-		// ---------------描画-------------------
-		// くるま
-		for (auto& i : obstructions) {
-			i.Draw();
-		}
+			goalFrame.draw(ColorF{ Palette::White, .25 });
 
-		// まるた
-		for (auto& i : logs) {
-			i.Draw();
-		}
+			// ゴール
+			for (auto i = 0; i < 5; i++) {
+				const int gx = 118, gy = 253;
 
-		// 亀
-		for (auto& i : turtles) {
-			i.TurtleDraw();
-		}
+				// 当たり判定
+				Rect goalsCol[5] = {
+					{gx + 160 * i, gy, 60, 60},
+				};
 
-		// ゴール
-		goal.draw(goalPos);
+				for (auto& j : goalsCol) {
+					j.draw(Palette::Red);
+				}
+			}
 
-		if (sw.isRunning() && sw.sF() < 3) {
-			Rect(frogPos.asPoint(), Tile, Tile).draw(Palette::Red);
-		}
-		else {
-			// かえる描画
-			frogAnims[frogPattern].draw(frogPos);
-		}
+			// ---------------描画-------------------
+
+			// くるま
+			for (auto& i : obs) {
+				i.Draw();
+			}
+
+			// まるた
+			for (auto& i : logs) {
+				i.Draw();
+			}
+
+			// 亀
+			for (auto& i : turtles) {
+				i.TurtleDraw();
+			}
+
+			// ゴール
+			goal.draw(goalPos);
+
+			if (sw.isRunning() && sw.sF() < 3) {
+				Rect(frogPos.asPoint(), Tile, Tile).draw(Palette::Red);
+			}
+			else {
+				// かえる描画
+				frogAnims[frogPattern].draw(frogPos);
+			}
 
 #if _DEBUG
 
-		font30(Cursor::Pos()).draw(0, 0);
-		font30(frogPos).draw(0, font30.fontSize());
+			font30(Cursor::Pos()).draw(0, 0);
+			font30(frogPos).draw(0, font30.fontSize());
 
 #endif // _DEBUG
+		}
 	}
-
 }
