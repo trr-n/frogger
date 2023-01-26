@@ -46,6 +46,8 @@ private:
 	const Texture turtleAnims{ U"stageObjects/turtlePatterns.png" }; // 亀 アニメーション
 	const Texture log{ U"stageObjects/log.png" }; // 丸太
 	const Texture crocodile{ U"stageObjects/crocodile.png" }; // ワニ
+	const Texture deadPattern{ U"frogAnimations/death_pattern.png" };
+	const Texture plunkPattern{ U"frogAnimations/plunk_pattern.png" };
 
 	const Texture frogger{ U"char/frogger.png" };
 	const Texture f{ U"char/f.png" };

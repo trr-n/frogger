@@ -71,16 +71,17 @@
 //	::ShowWindow(::GetConsoleWindow(), SW_HIDE);
 //
 //	return 0;
-//}
-
-#pragma endregion
-
-void MyGame::Credits() {
+//
 	/*
 	MSEdgeHTM - Edge
 	ChromeHTML - Chrome
 	VivaldiHTM.GUXOMTPISLLFOBXOQGDWIWRECU - vivaldi
 	*/
+//}
+
+#pragma endregion
+
+void MyGame::Credits() {
 
 	while (Update()) {
 		// auto browser = textBuffer;
@@ -103,6 +104,7 @@ void MyGame::Credits() {
 		auto& cg = Rect{ 441, 290, 400, 60 }. draw(ColorF{ Palette::Darkmagenta, alp });
 		auto& od = Rect{ 110, 380, 100, 100 }.draw(ColorF{ Palette::Darkred , alp });
 		auto& si = Rect{ 1000, 380, 100, 100 }.draw(ColorF{ Palette::Darkblue, alp });
+		auto& gt = Rect{ 570, 385, 140, 60 }.draw(ColorF{ Palette::Darkkhaki, alp });
 
 		if (sr.leftClicked())
 			system("start chrome.exe https://spriters-resource.com");
@@ -115,5 +117,10 @@ void MyGame::Credits() {
 
 		if (si.leftClicked())
 			system("start chrome.exe https://siv3d.github.io");
+
+		if (gt.leftClicked())
+			system("start chrome.exe https://www.bf-lessson.com/1062");
+
+		font30(Cursor::Pos()).draw(0, font30.fontSize(), Palette::Black);
 	}
 }
