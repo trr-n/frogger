@@ -1,5 +1,66 @@
-﻿# include "stdafx.h"
+﻿# include <stdio.h>
+# include <iostream>
+# include <string>
+# include <map>
+# include "stdafx.h"
 // # include "PlayOneShot.h"
+// # include <NamedParameter.hpp>
+
+//using V2 = std::map<std::string, Vec2>;
+using str = std::string;
+
+/// @brief 速度の値を管理
+class Speeds {
+public:
+	int car0, car1, car2, car3, car4;
+	int log, turtle;
+	Speeds(void);
+
+	/// @brief 移動速度を指定
+	/// @param c0 車
+	/// @param c1 ↓
+	/// @param c2 ↓ 
+	/// @param c3 ↓
+	/// @param c4 __
+	/// @param log 丸太
+	/// @param turtle 亀
+	Speeds(int c0, int c1, int c2, int c3, int c4, int log, int turtle) {
+		car0 = c0;
+		car1 = c1;
+		car2 = c2;
+		car3 = c3;
+		car4 = c4;
+		Speeds::log = log;
+		Speeds::turtle = turtle;
+	}
+};
+
+/// @brief 生成座標を管理
+class SpawnPosition
+{
+public:
+	Point leftUp, leftBottom, rightUp, rightBottom;
+
+	SpawnPosition() {
+		leftUp = Point(0, 0);
+		leftBottom = Point(0, 0);
+		rightUp = Point(0, 0);
+		rightBottom = Point(0, 0);
+	}
+
+	/// @brief 上下レーンの障害物の生成座標を指定
+	/// @param _leftUp 上段の左側
+	/// @param _leftBottom 下段の左側
+	/// @param _rightUp 上段の右側
+	/// @param _rightBottom 下段の右側
+	SpawnPosition(Point _leftUp, Point _leftBottom, Point _rightUp, Point _rightBottom)
+	{
+		leftUp.set(_leftUp);
+		leftBottom.set(_leftBottom);
+		rightUp.set(_rightUp);
+		rightBottom.set(_rightBottom);
+	}
+};
 
 class GameObject {
 public:
@@ -7,68 +68,98 @@ public:
 	Vec2 velocity;
 	Texture texture;
 
+	/// @brief 初期値を指定
+	/// @param $tex テクスチャ
+	/// @param $pos 座標
+	/// @param $speed 移動速度
 	GameObject(Texture $tex, Vec2 $pos, int $speed) {
 		texture = $tex;
 		position = $pos;
 		velocity.set($speed, 0);
 	}
 
+	/// @brief 移動、更新
 	void Update() {
 		position += velocity * Scene::DeltaTime();
 	}
 
+	/// @brief 描画
 	void Draw() {
 		texture.draw(position);
 	}
 };
 
 class Turtle {
-	Rect drawRegion{ 0, 0, 0, 0 };
+	Rect drawregion{ 0, 0, 0, 0 };
+
 public:
 	Texture texture;
 	Stopwatch sw;
 	const int width = 64, height = 64;
-	Vec2 position;
-	Vec2 velocity;
+	Vec2 position, velocity;
 
 	Turtle() {
 		Initialize(Texture(), Vec2::Zero());
 	}
 
-	Turtle(Texture $texture, Vec2 $position, int $speed) {
-		Initialize($texture, $position);
-		velocity.set($speed, 0);
+	/// @brief 亀の初期値を指定
+	/// @param texture テクスチャ
+	/// @param position 座標
+	/// @param speed 速度
+	Turtle(Texture texture, Vec2 position, int speed) {
+		Initialize(texture, position);
+		velocity.set(speed, 0);
 	}
 
-	void Initialize(Texture _texture, Vec2 _position) {
-		texture = _texture;
-		position = _position;
+	/// @brief 初期化、タイマースタート
+	/// @param texture テクスチャ
+	/// @param position 座標
+	void Initialize(Texture texture, Vec2 position) {
+		texture = texture;
+		position = position;
 		sw.start();
 	}
 
-	void TurtleUpdate() {
+	/// @brief 移動、アニメーション更新
+	void Update() {
 		position += velocity * Scene::DeltaTime();
-		drawRegion.set(GetTurtleIndex() * width, 0, width, height);
+		drawregion.set(GetIndex() * width, 0, width, height);
 	}
 
-	void TurtleDraw() {
-		texture(drawRegion).draw(position);
+	/// @brief 描画
+	void Draw() {
+		texture(drawregion).draw(position);
 	}
 
-	int GetTurtleIndex(int _i = 8) {
-		int animationSpan = 500; // 1/2秒で切り替え
-		int animationIndex = (sw.ms() / animationSpan) % _i;
-
-		return animationIndex;
+	/// @brief 描画中の
+	/// @param totalIndex 合計アニメーションパターン数
+	/// @param animeSpan アニメーションスピード
+	/// @return 描画中
+	int GetIndex(int totalIndex = 8, int animeSpan = 500) {
+		return (sw.ms() / animeSpan) % totalIndex;
 	}
 
-	bool IsPlunking() {
-		return 6 < GetTurtleIndex();
+	/// @brief 沈んでいるかの判定
+	/// @param plunkingAnim 沈み始めるアニメーションパターン 
+	/// @return 沈んでいたら true, 浮いていたら false
+	bool IsPlunking(int plunkingAnim = 6) {
+		return plunkingAnim < GetIndex();
 	}
 };
 
+//void OutOfScreen(
+//	GameObject object,
+//	s3d::Vec2 position,
+//	double xy,
+//	Vec2 turn
+//) {
+//	if (object.position.xy) {
+//		object.position.xy = turn.xy;
+//	}
+//};
+
 void MyGame::Play() {
-	if (SimpleGUI::ButtonAt(U"Title", Vec2{ 0, Scene::Height() })) {
+	if (SimpleGUI::ButtonAt(U"Title", Vec2(0, Scene::Height()))) {
 		ChangeScene(&MyGame::Title);
 	}
 
@@ -76,19 +167,23 @@ void MyGame::Play() {
 	Scene::SetBackground(Color(0, 0, 26));
 
 	TextureRegion frogAnims[8] = {
-		frogsForward(0,		0, Tile * 1, Tile),
-		frogsForward(Tile,	0, Tile * 2, Tile * 2),
-		frogsBack(0,		0, Tile * 1, Tile),
+		frogsForward(0, 0, Tile * 1, Tile),
+		frogsForward(Tile, 0, Tile * 2, Tile * 2),
+		frogsBack(0, 0, Tile * 1, Tile),
 		frogsBack(Tile,	0, Tile * 2, Tile * 2),
-		frogsLeft(0,		0, Tile * 1, Tile),
+		frogsLeft(0, 0, Tile * 1, Tile),
 		frogsLeft(Tile,	0, Tile * 2, Tile * 2),
-		frogsRight(Tile,	0, Tile * 2, Tile * 2),
-		frogsRight(0,		0, Tile * 1, Tile)
+		frogsRight(Tile, 0, Tile * 2, Tile * 2),
+		frogsRight(0, 0, Tile * 1, Tile)
 	};
 
-	const Vec2 frogSpawn(448, 1216);
-	Vec2 frogPos(frogSpawn);
+	/// @brief かえるの生成座標、初期地点
+	const Vec2 FrogSpawn(448, 1024);
+	/// @brief かえるの座標
+	Vec2 frogPos(FrogSpawn);
+	/// @brief かえるの速度
 	Vec2 frogVel(0, 0);
+	/// @brief ゴールの座標 
 	Vec2 goalPos(15, 220);
 
 	Vec2 upperRight(960, 576);
@@ -96,97 +191,129 @@ void MyGame::Play() {
 	Vec2 lowerRight(900, 960);
 	Vec2 lowerLeft(-128, 896);
 
-	const int sceneW = Scene::Width() - Tile;
-	const int sceneH = Scene::Height() - Tile * 2;
-	const int logSpeed = 80;
-	const int turtleSpeed = 60;
-	const int car1Speed = 80;
-	const int car2Speed = 70;
-	const int car3Speed = 80;
-	const int car4Speed = 180;
-	const int car5Speed = 65;
+	/// @brief 上下段オブジェ生成座標
+	/// @brief 1: left up
+	/// @brief 2: left bottom    
+	/// @brief 3: right up
+	/// @brief 4: right bottom
+	SpawnPosition spawnPos(
+		Point(-128, 512),
+		Point(-128, 896),
+		Point(960, 576),
+		Point(900, 960)
+	);
 
-	Array<GameObject> obs;
-	Array<GameObject> logs;
+	/// @brief シーンの横幅
+	int sceneWidth = Scene::Width() - Tile;
+	/// @brief シーンの縦幅
+	int sceneHeight = Scene::Height() - Tile * 2;
+
+	/// @brief オブジェクトの移動速度
+	/// @brief 0-4: cars
+	/// @brief 5: log
+	/// @brief 6: turtle
+	Speeds speeds(80, 70, 80, 180, 65, 80, 60);
+
+	Array<GameObject> cars, logs;
 	Array<Turtle> turtles;
 
-	for (auto i = 0; i < 3; i++) {
-		auto s = Random(200, 400), ss = Random(200, 400), sss = Random(200, 400), ssss = Random(200, 400), sssss = Random(200, 400);
-		obs << GameObject(car1, lowerRight - Vec2(i * s, Tile * 0), -car1Speed);
-		obs << GameObject(car2, lowerLeft + Vec2(i * ss, Tile * 0), car2Speed);
-		obs << GameObject(car3, lowerRight - Vec2(i * sss, Tile * 2), -car3Speed);
-		obs << GameObject(car4, lowerLeft + Vec2(i * ssss, -Tile * 2), car4Speed);
-		obs << GameObject(car5, lowerRight - Vec2(i * sssss, Tile * 4), -car5Speed);
+	int carLanes[] = { 0, 0, 2, 2, 4 };
+	for (int i = 0; i < 3; i++) {
+		/// @brief ランダムで車間距離を生成
+		auto spaceAdd = [&]() { return i * Random(200, 400); };
+		cars << GameObject(car0, spawnPos.rightBottom - Vec2(spaceAdd(), Tile * 0), -speeds.car0);
+		cars << GameObject(car1, spawnPos.leftBottom + Vec2(spaceAdd(), Tile * 0), speeds.car1);
+		cars << GameObject(car2, spawnPos.rightBottom - Vec2(spaceAdd(), Tile * 2), -speeds.car2);
+		cars << GameObject(car3, spawnPos.leftBottom + Vec2(spaceAdd(), -Tile * 2), speeds.car3);
+		cars << GameObject(car4, spawnPos.rightBottom - Vec2(spaceAdd(), Tile * 4), -speeds.car4);
 	}
 
+	int logLanes[3] = { 0,2,3 };
 	int logMin = 400, logMax = 700;
-	for (auto i = 0; i < 4; i++) {
-		auto s = Random(logMin, logMax), ss = Random(logMin, logMax), sss = Random(logMin, logMax);
-		logs << GameObject(log, upperLeft - Vec2(i * s, Tile * 0), logSpeed);
-		logs << GameObject(log, upperLeft - Vec2(i * ss, Tile * 2), logSpeed);
-		logs << GameObject(log, upperLeft - Vec2(i * sss, Tile * 3), logSpeed);
+	for (auto i = 0; i < 3; i++) {
+		logs << GameObject(
+			log,
+			upperLeft - Vec2(i * Random(logMin, logMax), Tile * logLanes[i]),
+			speeds.log
+		);
 	}
 
 	// 3匹セットで生成
+	int turtleLanes[] = { 0, 2 };
 	for (auto i = 0; i < 5; i++) {
-		for (auto j = 0; j < 3; j++) {
-			turtles << Turtle(turtleAnims, upperRight + Vec2(Tile * j, 0), -turtleSpeed);
-			turtles << Turtle(turtleAnims, upperRight - Vec2(Tile * j, Tile * 2), -turtleSpeed);
+		for (auto j = 0; j < 2; j++) {
+			turtles << Turtle(
+				turtleAnims,
+				upperRight - Vec2(Tile * j, Tile * turtleLanes[j]),
+				-speeds.turtle
+			);
 		}
 	}
 
 	Stopwatch sw;
-	Stopwatch isDeadTimer;
+	/// @brief 再生成するまでの時間を計測するタイマー
+	Stopwatch respawnTimer;
 
-	const int Up = 0, Back = 2, Left = 4, Right = 6;
+	const int Up = 0, Back = 2, left = 4, right = 6;
+	/// @brief アニメーションパターン
 	int frogPattern = Up;
-	int frogDirection = -1;
 
-	int move = 1;
+	/// @brief 移動速度
+	int moving = 1;
+	/// @brief アニメーションパターンのカウント
 	int count = 0;
-	int n = 2;
-
-	double moveSpeed = 0;
-
+	/// @brief 死んでから再度動けるようになるまでの時間
+	int breakTime = 2;
+	/// @brief 死亡判定フラグ
 	bool isDead = false;
 
 	while (Update()) {
-
 		if (KeySpace.down()) {
 			sw.start();
 		}
 
-		bool forwardDown = (KeyUp | KeyW).down();
-		bool leftDown = (KeyLeft | KeyA).down();
-		bool backDown = (KeyDown | KeyS).down();
-		bool rightDown = (KeyRight | KeyD).down();
+		/// @brief 移動キー
+		/// @brief 0 forward
+		/// @brief 1 back
+		/// @brief 2 left
+		/// @brief 3 right
+		bool keysDown[4] = {
+			(KeyUp | KeyW).down(),
+			(KeyDown | KeyS).down(),
+			(KeyLeft | KeyA).down(),
+			(KeyRight | KeyD).down()
+		};
 
 		// ---------------移動-------------------
 
-		auto MoveJump = [&](int _pattern, int _x, int _y) {
+		/// @brief ジャンプと効果音再生
+		auto Jumping = [&](int _pattern, int _x, int _y) {
 			frogPattern = _pattern + 1;
 			frogVel.set(_x, _y);
 			jumpSound.playOneShot();
-
 			count = 0;
 		};
 
-		// 地上か
+		// 地に足がついていて且つキーを押していたら移動
 		if (frogPattern % 2 == 0) {
-			if (forwardDown)
-				MoveJump(Up, 0, -move);
+			if (keysDown[0]) {
+				Jumping(Up, 0, -moving);
+			}
 
-			else if (backDown)
-				MoveJump(Back, 0, move);
+			else if (keysDown[1]) {
+				Jumping(Back, 0, moving);
+			}
 
-			else if (leftDown)
-				MoveJump(Left, -move, 0);
+			else if (keysDown[2]) {
+				Jumping(left, -moving, 0);
+			}
 
-			else if (rightDown)
-				MoveJump(Right, move, 0);
+			else if (keysDown[3]) {
+				Jumping(right, moving, 0);
+			}
 		}
 
-		// 移動中
+		// 移動時のアニメーション調整用
 		else {
 			auto velocity = frogVel;
 			switch (count) {
@@ -215,37 +342,36 @@ void MyGame::Play() {
 				velocity *= 8;
 				break;
 			default:
+				_ASSERT_EXPR(false, L"error");
 				break;
 			}
 
 			frogPos += velocity;
 			count++;
 
-			if (count > 7)
+			if (count > 7) {
 				frogPattern -= 1;
+			}
 		}
 
-		// かえるが画面外にでないように
-		frogPos.x >= sceneW ? frogPos.x = sceneW : frogPos.x;
-		frogPos.x <= 0 ? frogPos.x = 0 : frogPos.x;
-		frogPos.y >= sceneH ? frogPos.y = sceneH : frogPos.y;
-		frogPos.y <= 0 ? frogPos.y = 0 : frogPos.y;
+		// 画面外にでないように移動可能な範囲を限定
+		frogPos.x = std::clamp((int)frogPos.x, 0, sceneWidth);
+		frogPos.y = std::clamp((int)frogPos.y, 0, sceneHeight);
 
 		Rect frogCol(frogPos.asPoint() + Point(16, 16), (frogsForward.width() / 2) - 32, frogsForward.height() - 32);
 		frogCol.draw(ColorF(Palette::Cyan, 0.25));
 
 		// くるまの移動と当たり判定
-		for (auto& i : obs) {
+		for (auto& i : cars) {
 			i.Update();
 
 			// くるま当たり判定
-			Rect obstructsCol(i.position.asPoint(), i.texture.width(), i.texture.height());
-			if (obstructsCol.intersects(frogCol) && !isDead) {
+			Rect obsCol(i.position.asPoint(), i.texture.width(), i.texture.height());
+			if (obsCol.intersects(frogCol) && !isDead) {
 				squash.playOneShot();
-
 				isDead = true;
 				if (isDead) {
-					isDeadTimer.start();
+					respawnTimer.start();
 				}
 			}
 
@@ -254,68 +380,79 @@ void MyGame::Play() {
 			if (i.position.x > 1200) i.position.x = lowerLeft.x;
 		}
 
-		Rect plunkZone(0, 325, 900, 300);
-		plunkZone.draw(ColorF(Palette::Skyblue, .25));
+		Rect plunkArea(0, 325, 900, 300);
+		plunkArea.draw(ColorF(Palette::Skyblue, .25));
 
-		// まるたの移動と当たり判定
-		for (auto& i : logs) {
-			i.Update();
+# if _DEBUG
+		static double inc = 1;
+		if (KeyJ.pressed()) inc += .001;
+		if (KeyK.pressed()) inc -= .001;
 
-			Rect logCol(i.position.asPoint(), i.texture.width(), i.texture.height());
+		if (KeyE.pressed()) frogPos.y = 576;
+#endif
+
+		// 丸太 -------------
+		for (auto& log : logs) {
+			log.Update();
+
+			Rect logCol(log.position.asPoint(), log.texture.width(), log.texture.height());
 			if (logCol.intersects(frogCol)) {
-				frogPos.x += logSpeed * Scene::DeltaTime();
+				frogPos.x += speeds.log * (inc / 60.0);
 			}
 
-			if (i.position.x > 1200) i.position.x = lowerLeft.x;
+			// ループ
+			if (log.position.x > 1200) {
+				log.position.x = lowerLeft.x;
+			}
 		}
 
-		// 亀
-		for (auto& i : turtles) {
-			i.TurtleUpdate();
+		// 亀 -------------
+		for (auto& turtle : turtles) {
+			turtle.Update();
 
-			Rect turtleCol(i.position.asPoint(), Tile, Tile);
+			Rect turtleCol(turtle.position.asPoint(), Tile, Tile);
 			// 左(亀の進行方向)に押し出される
 			if (turtleCol.intersects(frogCol)) {
-				frogPos.x -= turtleSpeed * Scene::DeltaTime();
+				frogPos.x -= speeds.turtle * Scene::DeltaTime();
 
-				if (i.IsPlunking()) {
-					frogPos = frogSpawn;
+				if (turtle.IsPlunking()) {
+					frogPos = FrogSpawn;
 					plunkSound.playOneShot();
 				}
 			}
 
-			if (i.position.x < -300) i.position.x = lowerRight.x;
-		}
-
-		// ピンクの足場
-		for (auto i = 0; i < Scene::Width(); i += Tile) {
-			Vec2 footing1(i, sceneH);
-			Vec2 footing2(i, sceneH / 2);
-			footing.draw(i, sceneH);
-			footing.draw(i, 640);
-
-			// 当たり判定
-			Rect footing1Col(footing1.asPoint(), footing.width(), footing.height());
-			Rect footing2Col(footing2.asPoint(), footing.width(), footing.height());
-			if (footing1Col.intersects(frogPos) || footing2Col.intersects(frogPos)) {
+			if (turtle.position.x < -300) {
+				turtle.position.x = lowerRight.x;
 			}
 		}
 
-		// ゴールのフレーム
+		// ピンクの足場(中間地点) -------------
+		for (auto pinkie = 0; pinkie < Scene::Width(); pinkie += Tile) {
+			Vec2 f0(pinkie, sceneHeight);
+			Vec2 f1(pinkie, sceneHeight / 2);
+			footing.draw(pinkie, sceneHeight);
+			footing.draw(pinkie, 640);
+
+			// 当たり判定
+			Rect fCol0(f0.asPoint(), footing.width(), footing.height());
+			Rect fCol1(f1.asPoint(), footing.width(), footing.height());
+			if (fCol0.intersects(frogPos) || fCol1.intersects(frogPos)) {
+			}
+		}
+
+		// ゴールのフレーム -------------
 		Rect goalFrame(goalPos.asPoint(), 80, 50);
 		if (goalFrame.intersects(frogCol)) {
-			Print << U"フレーム";
 		}
 
 		goalFrame.draw(ColorF{ Palette::White, .25 });
 
-		// ゴール
-		for (auto i = 0; i < 5; i++) {
+		// ゴール -------------
+		for (auto goal = 0; goal < 5; goal++) {
 			const int gx = 118, gy = 253;
 
-			// 当たり判定
 			Rect goalsCol[5] = {
-				{gx + 160 * i, gy, 60, 60},
+				{ gx + 160 * goal, gy, 60, 60 }
 			};
 
 			for (auto& j : goalsCol) {
@@ -323,29 +460,23 @@ void MyGame::Play() {
 			}
 
 			if (goalsCol->intersects(frogCol)) {
-				Print << U"goal";
 			}
 		}
 
-
 		// ---------------描画-------------------
 
-		// くるま
-		for (auto& i : obs) {
-			i.Draw();
+		for (auto& cars : cars) {
+			cars.Draw();
 		}
 
-		// まるた
-		for (auto& i : logs) {
-			i.Draw();
+		for (auto& logs : logs) {
+			logs.Draw();
 		}
 
-		// 亀
-		for (auto& i : turtles) {
-			i.TurtleDraw();
+		for (auto& turtles : turtles) {
+			turtles.Draw();
 		}
 
-		// ゴール
 		goal.draw(goalPos);
 
 		if (sw.isRunning() && sw.sF() < 3) {
@@ -358,35 +489,37 @@ void MyGame::Play() {
 
 		if (isDead) {
 			// 一定時間おきにパターン変化
-			//Rect(frogPos.asPoint(), 100, 100).draw();
-			move = 0;
+			moving = 0;
 
 			// 車とぶつかったとき
-			int pt = isDeadTimer.sF() / (n / 7.0);
+			int pattern = (int)respawnTimer.sF() / (breakTime / 7.0);
 			auto w = deadPattern.width() / 7;
-			deadPattern(pt * w, 0, w, Tile).draw(frogPos);
+			deadPattern(pattern * w, 0, w, Tile).draw(frogPos);
 
-			// 溺死
+			// 溺死 未実装 ----------------------------------
 
 			// しんだら2秒間
-			if (isDeadTimer.sF() >= n) {
-				frogPos = frogSpawn;
+			if (respawnTimer.sF() >= breakTime) {
+				frogPos = FrogSpawn;
 				isDead = false;
-				move = 1;
-				isDeadTimer.reset();
+				moving = 1;
+				respawnTimer.reset();
 			}
 		}
 
 #if _DEBUG
 
-		font30(frogPos).draw(0, font30.fontSize());
 		font30(Cursor::Pos()).draw(0, 0, Palette::White);
+		font30(frogPos).draw(0, font30.fontSize());
 		font30(count).draw(0, font30.fontSize() * 2);
+		font30(123).draw(0, font30.fontSize() * 3);
 
-		auto r = Random(1, 10);
-		font30(r).draw(0, font30.fontSize() * 3);
-
-#endif // _DEBUG
+#endif
 	}
 }
 
+/*
+TODO
+ゴールしたらでかいかえるを表示
+そのかえるを数えてクリアか判定
+*/

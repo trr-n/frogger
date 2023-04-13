@@ -37,11 +37,11 @@ private:
 
 	const Texture footing{ U"stageObjects/footing.png" }; // ピンクの足場
 	const Texture goal{ U"stageObjects/goal.png" }; // ゴール
-	const Texture car1{ U"stageObjects/car1.png" }; // 車
-	const Texture car2{ U"stageObjects/car2.png" };
-	const Texture car3{ U"stageObjects/car3.png" };
-	const Texture car4{ U"stageObjects/car4.png" };
-	const Texture car5{ U"stageObjects/car5.png" };
+	const Texture car0{ U"stageObjects/car1.png" }; // 車
+	const Texture car1{ U"stageObjects/car2.png" };
+	const Texture car2{ U"stageObjects/car3.png" };
+	const Texture car3{ U"stageObjects/car4.png" };
+	const Texture car4{ U"stageObjects/car5.png" };
 	const Texture turtle{ U"stageObjects/turtle.png" }; // 亀 アニメーション
 	const Texture turtleAnims{ U"stageObjects/turtlePatterns.png" }; // 亀 アニメーション
 	const Texture log{ U"stageObjects/log.png" }; // 丸太

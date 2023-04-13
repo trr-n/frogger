@@ -77,7 +77,7 @@
 	ChromeHTML - Chrome
 	VivaldiHTM.GUXOMTPISLLFOBXOQGDWIWRECU - vivaldi
 	*/
-//}
+	//}
 
 #pragma endregion
 
@@ -99,12 +99,12 @@ void MyGame::Credits() {
 		int y60 = font60.fontSize(), y = y60 / 2;
 		int y30 = font30.fontSize() + 10;
 
-		auto alp = 0.0;
-		auto& sr = Rect{ 411, 192, 460, 60 }. draw(ColorF{ Palette::Darkcyan, alp });
-		auto& cg = Rect{ 441, 290, 400, 60 }. draw(ColorF{ Palette::Darkmagenta, alp });
-		auto& od = Rect{ 110, 380, 100, 100 }.draw(ColorF{ Palette::Darkred , alp });
-		auto& si = Rect{ 1000, 380, 100, 100 }.draw(ColorF{ Palette::Darkblue, alp });
-		auto& gt = Rect{ 570, 385, 140, 60 }.draw(ColorF{ Palette::Darkkhaki, alp });
+		auto alpha = 0.0;
+		auto& sr = Rect{ 411, 192, 460, 60 }. draw(ColorF{ Palette::Darkcyan, alpha });
+		auto& cg = Rect{ 441, 290, 400, 60 }. draw(ColorF{ Palette::Darkmagenta, alpha });
+		auto& od = Rect{ 110, 380, 100, 100 }.draw(ColorF{ Palette::Darkred , alpha });
+		auto& si = Rect{ 1000, 380, 100, 100 }.draw(ColorF{ Palette::Darkblue, alpha });
+		auto& gt = Rect{ 570, 385, 140, 60 }.draw(ColorF{ Palette::Darkkhaki, alpha });
 
 		if (sr.leftClicked())
 			system("start chrome.exe https://spriters-resource.com");
