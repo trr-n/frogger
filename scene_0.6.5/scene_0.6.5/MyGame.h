@@ -35,7 +35,7 @@ private:
 	const Font font30{ 30 };
 	const Font font60{ 60 };
 
-	const Texture footing{ U"stageObjects/footing.png" }; // ピンクの足場
+	const Texture halfway{ U"stageObjects/footing.png" }; // ピンクの足場
 	const Texture goal{ U"stageObjects/goal.png" }; // ゴール
 	const Texture car0{ U"stageObjects/car1.png" }; // 車
 	const Texture car1{ U"stageObjects/car2.png" };

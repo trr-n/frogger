@@ -1,128 +1,10 @@
-﻿# include <stdio.h>
-# include <iostream>
-# include <string>
-# include <map>
-# include "stdafx.h"
-// # include "PlayOneShot.h"
-// # include <NamedParameter.hpp>
+﻿#include <stdio.h>
+#include <iostream>
+#include <string>
+#include <map>
 
 //using V2 = std::map<std::string, Vec2>;
 using str = std::string;
-
-/// @brief 速度の値を管理
-class Speeds {
-public:
-	int car0, car1, car2, car3, car4;
-	int log, turtle;
-	Speeds(void);
-
-	/// @brief 移動速度を指定
-	/// @param c0 車
-	/// @param c1 ↓
-	/// @param c2 ↓ 
-	/// @param c3 ↓
-	/// @param c4 __
-	/// @param log 丸太
-	/// @param turtle 亀
-	Speeds(int c0, int c1, int c2, int c3, int c4, int log, int turtle) {
-		car0 = c0;
-		car1 = c1;
-		car2 = c2;
-		car3 = c3;
-		car4 = c4;
-		Speeds::log = log;
-		Speeds::turtle = turtle;
-	}
-};
-
-/// @brief 生成座標を管理
-class SpawnPosition
-{
-public:
-	Point leftUp, leftBottom, rightUp, rightBottom;
-
-	SpawnPosition() {
-		leftUp = Point(0, 0);
-		leftBottom = Point(0, 0);
-		rightUp = Point(0, 0);
-		rightBottom = Point(0, 0);
-	}
-
-	/// @brief 上下レーンの障害物の生成座標を指定
-	/// @param _leftUp 上段の左側
-	/// @param _leftBottom 下段の左側
-	/// @param _rightUp 上段の右側
-	/// @param _rightBottom 下段の右側
-	SpawnPosition(Point _leftUp, Point _leftBottom, Point _rightUp, Point _rightBottom)
-	{
-		leftUp.set(_leftUp);
-		leftBottom.set(_leftBottom);
-		rightUp.set(_rightUp);
-		rightBottom.set(_rightBottom);
-	}
-};
-
-class GameObject {
-public:
-	Vec2 position = { 0, 0 };
-	Vec2 velocity = { 0, 0 };
-	Texture texture;
-
-	Vec2* playerPosPtr;
-	Vec2 noData = { 0, 0 };
-	Vec2& playerPos = noData;
-	const Vec2 nonData = { 1280, 1280 };
-	/// @brief 丸太の左上からズレてる量
-	Vec2 shift = nonData;
-
-	GameObject() :playerPosPtr(nullptr), position(0, 0), velocity(0, 0)
-	{
-	}
-
-	/// @brief 初期値を指定
-	/// @param $tex テクスチャ
-	/// @param $pos 座標
-	/// @param $speed 移動速度
-	GameObject(Texture $tex, Vec2 $pos, int $speed) :playerPosPtr(nullptr), position(0, 0), velocity(0, 0)
-	{
-		texture = $tex;
-		position = $pos;
-		velocity.set($speed, 0);
-	}
-
-	/// @brief 移動、更新
-	void Update()
-	{
-		Vec2 rideSpeed = velocity;
-		position += rideSpeed;
-	}
-
-	void Drop()
-	{
-		playerPos = noData;
-	}
-
-	/// @brief オブジェクトに乗った瞬間の処理 / ズレ量の計算
-	/// @param _position プレイヤーの座標 ポインター
-	void RideOn(Vec2* _playerPos)
-	{
-		playerPosPtr = _playerPos;
-		/*if (shift == noData)
-		{
-			shift = *_playerPos - position;
-		}*/
-	}
-
-	bool IsRideOn()
-	{
-		return shift != nonData;
-	}
-
-	/// @brief 描画
-	void Draw() {
-		texture.draw(position);
-	}
-};
 
 class Turtle {
 	Rect drawregion{ 0, 0, 0, 0 };
@@ -133,7 +15,8 @@ public:
 	const int width = 64, height = 64;
 	Vec2 position, velocity;
 
-	Turtle() {
+	Turtle()
+	{
 		Initialize(Texture(), Vec2::Zero());
 	}
 
@@ -141,7 +24,8 @@ public:
 	/// @param texture テクスチャ
 	/// @param position 座標
 	/// @param speed 速度
-	Turtle(Texture texture, Vec2 position, int speed) {
+	Turtle(Texture texture, Vec2 position, int speed)
+	{
 		Initialize(texture, position);
 		velocity.set(speed, 0);
 	}
@@ -149,20 +33,23 @@ public:
 	/// @brief 初期化、タイマースタート
 	/// @param texture テクスチャ
 	/// @param position 座標
-	void Initialize(Texture _texture, Vec2 _position) {
+	void Initialize(Texture _texture, Vec2 _position)
+	{
 		_texture = _texture;
 		_position = _position;
 		sw.start();
 	}
 
 	/// @brief 移動、アニメーション更新
-	void Update() {
+	void Update()
+	{
 		position += velocity * Scene::DeltaTime();
 		drawregion.set(GetIndex() * width, 0, width, height);
 	}
 
 	/// @brief 描画
-	void Draw() {
+	void Draw()
+	{
 		texture(drawregion).draw(position);
 	}
 
@@ -170,38 +57,32 @@ public:
 	/// @param totalIndex 合計アニメーションパターン数
 	/// @param animeSpan アニメーションスピード
 	/// @return 描画中
-	int GetIndex(int totalIndex = 8, int animeSpan = 500) {
+	int GetIndex(int totalIndex = 8, int animeSpan = 500)
+	{
 		return (sw.ms() / animeSpan) % totalIndex;
 	}
 
 	/// @brief 沈んでいるかの判定
 	/// @param plunkingAnim 沈み始めるアニメーションパターン 
 	/// @return 沈んでいたら true, 浮いていたら false
-	bool IsPlunking(int plunkingAnim = 6) {
+	bool IsPlunking(int plunkingAnim = 6)
+	{
 		return plunkingAnim < GetIndex();
 	}
 };
 
-//void OutOfScreen(
-//	GameObject object,
-//	s3d::Vec2 position,
-//	double xy,
-//	Vec2 turn
-//) {
-//	if (object.position.xy) {
-//		object.position.xy = turn.xy;
-//	}
-//};
-
-void MyGame::Play() {
-	if (SimpleGUI::ButtonAt(U"Title", Vec2(0, Scene::Height()))) {
+void MyGame::Play()
+{
+	if (SimpleGUI::ButtonAt(U"Title", Vec2(0, Scene::Height())))
+	{
 		ChangeScene(&MyGame::Title);
 	}
 
 	Scene::Resize(SceneX, SceneY);
 	Scene::SetBackground(Color(0, 0, 26));
 
-	TextureRegion frogAnims[8] = {
+	TextureRegion frogAnims[8] =
+	{
 		frogsForward(0, 0, Tile * 1, Tile),
 		frogsForward(Tile, 0, Tile * 2, Tile * 2),
 		frogsBack(0, 0, Tile * 1, Tile),
@@ -220,6 +101,8 @@ void MyGame::Play() {
 	Vec2 frogVel(0, 0);
 	/// @brief ゴールの座標 
 	Vec2 goalPos(15, 220);
+	/// @brief 画面外待機場所
+	Vec2 frogOut(2048, 2048);
 
 	Vec2 upperRight(960, 576);
 	Vec2 upperLeft(-128, 512);
@@ -254,7 +137,8 @@ void MyGame::Play() {
 	Array<Turtle> turtles;
 
 	int carLanes[] = { 0, 0, 2, 2, 4 };
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 3; i++)
+	{
 		/// @brief ランダムで車間距離を生成
 		auto spaceAdd = [&]() { return i * Random(200, 400); };
 		cars << GameObject(car0, spawnPos.rightBottom - Vec2(spaceAdd(), Tile * 0), -speeds.car0);
@@ -266,7 +150,8 @@ void MyGame::Play() {
 
 	int logLanes[3] = { 0,2,3 };
 	int logMin = 400, logMax = 700;
-	for (auto i = 0; i < 3; i++) {
+	for (auto i = 0; i < 3; i++)
+	{
 		logs << GameObject(
 			log,
 			upperLeft - Vec2(i * Random(logMin, logMax), Tile * logLanes[i]),
@@ -276,8 +161,10 @@ void MyGame::Play() {
 
 	// 3匹セットで生成
 	int turtleLanes[] = { 0, 2 };
-	for (auto i = 0; i < 5; i++) {
-		for (auto j = 0; j < 2; j++) {
+	for (auto i = 0; i < 5; i++)
+	{
+		for (auto j = 0; j < 2; j++)
+		{
 			turtles << Turtle(
 				turtleAnims,
 				upperRight - Vec2(Tile * j, Tile * turtleLanes[j]),
@@ -303,10 +190,15 @@ void MyGame::Play() {
 	/// @brief 死亡判定フラグ
 	bool isDead = false;
 
-	while (Update()) {
-		if (KeySpace.down()) {
+
+	while (Update())
+	{
+#if _DEBUG
+		if (KeySpace.down())
+		{
 			sw.start();
 		}
+#endif
 
 		/// @brief 移動キー
 		/// @brief 0 forward
@@ -323,28 +215,33 @@ void MyGame::Play() {
 		// ---------------移動-------------------
 
 		/// @brief ジャンプと効果音再生
-		auto Jumping = [&](int _pattern, int _x, int _y) {
+		auto Jumping = [&](int _pattern, int _x, int _y)
+		{
 			frogPattern = _pattern + 1;
 			frogVel.set(_x, _y);
 			jumpSound.playOneShot();
 			count = 0;
 		};
 
-		// 地に足がついていて且つキーを押していたら移動
-		if (frogPattern % 2 == 0) {
-			if (keysDown[0]) {
+		if (frogPattern % 2 == 0)
+		{
+			if (keysDown[0])
+			{
 				Jumping(Up, 0, -moving);
 			}
 
-			else if (keysDown[1]) {
+			else if (keysDown[1])
+			{
 				Jumping(Back, 0, moving);
 			}
 
-			else if (keysDown[2]) {
+			else if (keysDown[2])
+			{
 				Jumping(left, -moving, 0);
 			}
 
-			else if (keysDown[3]) {
+			else if (keysDown[3])
+			{
 				Jumping(right, moving, 0);
 			}
 		}
@@ -352,7 +249,8 @@ void MyGame::Play() {
 		// 移動時のアニメーション調整用
 		else {
 			auto velocity = frogVel;
-			switch (count) {
+			switch (count)
+			{
 			case 0:
 				velocity *= 8;
 				break;
@@ -385,10 +283,18 @@ void MyGame::Play() {
 			frogPos += velocity;
 			count++;
 
-			if (count > 7) {
+			if (count > 7)
+			{
 				frogPattern -= 1;
 			}
 		}
+
+		/*/// @brief リスポーン,効果音再生
+		auto PlayF = [&](Audio a)
+		{
+			a.playOneShot();
+			frogPos = FrogSpawn;
+		};*/
 
 		// 画面外にでないように移動可能な範囲を限定
 		frogPos.x = std::clamp((int)frogPos.x, 0, sceneWidth);
@@ -398,15 +304,18 @@ void MyGame::Play() {
 		frogCol.draw(ColorF(Palette::Cyan, 0.25));
 
 		// くるまの移動と当たり判定
-		for (auto& i : cars) {
+		for (auto& i : cars)
+		{
 			i.Update();
 
 			// くるま当たり判定
 			Rect obsCol(i.position.asPoint(), i.texture.width(), i.texture.height());
-			if (obsCol.intersects(frogCol) && !isDead) {
+			if (obsCol.intersects(frogCol) && !isDead)
+			{
 				squash.playOneShot();
 				isDead = true;
-				if (isDead) {
+				if (isDead)
+				{
 					respawnTimer.start();
 				}
 			}
@@ -416,10 +325,22 @@ void MyGame::Play() {
 			if (i.position.x > 1200) i.position.x = lowerLeft.x;
 		}
 
+		// 水没判定
 		Rect plunkArea(0, 325, 900, 300);
+		Stopwatch plunkTimer;
 		plunkArea.draw(ColorF(Palette::Skyblue, .25));
-
-		if (KeyE.pressed()) frogPos.y = 576;
+		// plunkAreaにあたっていて且つ移動速度が0だったら水没
+		if (frogCol.intersects(plunkArea))
+		{
+			frogPos = Vec2(4444, 4444);
+			plunkTimer.start();
+			plunkSound.playOneShot();
+		}
+		// 2秒以上たったら初期地点へ
+		if (plunkTimer.sF() >= 2)
+		{
+			frogPos = FrogSpawn;
+		}
 
 		// 丸太 -------------
 		for (auto& log0 : logs)
@@ -433,6 +354,8 @@ void MyGame::Play() {
 			}
 			log0.Update();
 
+			//log0.Returns(1200, lowerLeft.x);
+
 			if (log0.position.x > 1200)
 			{
 				log0.position.x = lowerLeft.x;
@@ -445,83 +368,94 @@ void MyGame::Play() {
 			turtle0.Update();
 
 			Rect turtleCol(turtle0.position.asPoint(), Tile, Tile);
-			// 左(亀の進行方向)に押し出される
-			if (turtleCol.intersects(frogCol)) {
+			if (turtleCol.intersects(frogCol))
+			{
 				frogPos.x -= speeds.turtle * Scene::DeltaTime();
-
-				if (turtle0.IsPlunking()) {
-					frogPos = FrogSpawn;
-					plunkSound.playOneShot();
-				}
 			}
 
-			if (turtle0.position.x < -300) {
+			//  
+			if (turtle0.position.x < -300)
+			{
 				turtle0.position.x = lowerRight.x;
 			}
 		}
 
 		// ピンクの足場(中間地点) -------------
-		for (auto pinkie = 0; pinkie < Scene::Width(); pinkie += Tile) {
+		for (auto pinkie = 0; pinkie < Scene::Width(); pinkie += Tile)
+		{
 			Vec2 f0(pinkie, sceneHeight);
 			Vec2 f1(pinkie, sceneHeight / 2);
-			footing.draw(pinkie, sceneHeight);
-			footing.draw(pinkie, 640);
+			halfway.draw(pinkie, sceneHeight);
+			halfway.draw(pinkie, 640);
 
-			// 当たり判定
-			Rect fCol0(f0.asPoint(), footing.width(), footing.height());
-			Rect fCol1(f1.asPoint(), footing.width(), footing.height());
-			if (fCol0.intersects(frogPos) || fCol1.intersects(frogPos)) {
+			Rect fCol0(f0.asPoint(), halfway.width(), halfway.height());
+			Rect fCol1(f1.asPoint(), halfway.width(), halfway.height());
+			if (fCol0.intersects(frogPos) || fCol1.intersects(frogPos))
+			{
 			}
 		}
 
 		// ゴールのフレーム -------------
 		Rect goalFrame(goalPos.asPoint(), 80, 50);
-		if (goalFrame.intersects(frogCol)) {
+		if (goalFrame.intersects(frogCol))
+		{
+			// 音変更予定
+			squash.playOneShot();
+			frogPos = FrogSpawn;
 		}
 
 		goalFrame.draw(ColorF{ Palette::White, .25 });
 
 		// ゴール -------------
-		for (auto goal0 = 0; goal0 < 5; goal0++) {
+		for (auto goal0 = 0; goal0 < 5; goal0++)
+		{
 			const int gx = 118, gy = 253;
 
 			Rect goalsCol[5] = {
 				{ gx + 160 * goal0, gy, 60, 60 }
 			};
 
-			for (auto& j : goalsCol) {
+			for (auto& j : goalsCol)
+			{
 				j.draw(Palette::Red);
 			}
 
-			if (goalsCol->intersects(frogCol)) {
+			if (goalsCol->intersects(frogCol))
+			{
 			}
 		}
 
 		// ---------------描画-------------------
 
-		for (auto& c : cars) {
+		for (auto& c : cars)
+		{
 			c.Draw();
 		}
 
-		for (auto& l : logs) {
+		for (auto& l : logs)
+		{
 			l.Draw();
 		}
 
-		for (auto& t : turtles) {
+		for (auto& t : turtles)
+		{
 			t.Draw();
 		}
 
 		goal.draw(goalPos);
 
-		if (sw.isRunning() && sw.sF() < 3) {
+		if (sw.isRunning() && sw.sF() < 3)
+		{
 			Rect(frogPos.asPoint(), Tile, Tile).draw(Palette::Red);
 		}
 
-		else {
+		else
+		{
 			frogAnims[frogPattern].draw(frogPos);
 		}
 
-		if (isDead) {
+		if (isDead)
+		{
 			// 一定時間おきにパターン変化
 			moving = 0;
 
@@ -532,8 +466,9 @@ void MyGame::Play() {
 
 			// 溺死 未実装 ----------------------------------
 
-			// しんだら2秒間
-			if (respawnTimer.sF() >= breakTime) {
+			// しんだら2秒間休憩
+			if (respawnTimer.sF() >= breakTime)
+			{
 				frogPos = FrogSpawn;
 				isDead = false;
 				moving = 1;
@@ -543,7 +478,9 @@ void MyGame::Play() {
 
 #if _DEBUG
 
-		//font30(Cursor::Pos()).draw(0, 0, Palette::White);
+		if (KeyE.pressed()) frogPos.y = 576;
+
+		font30(Cursor::Pos()).draw(0, 0, Palette::White);
 		font30(frogPos).draw(0, font30.fontSize());
 		font30(frogVel).draw(0, font30.fontSize() * 2);
 		font30().draw(0, font30.fontSize() * 3);
@@ -551,9 +488,3 @@ void MyGame::Play() {
 #endif
 	}
 }
-
-/*
-TODO
-ゴールしたらでかいかえるを表示
-そのかえるを数えてクリアか判定
-*/
