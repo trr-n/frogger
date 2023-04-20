@@ -71,6 +71,28 @@ public:
 	}
 };
 
+class FrogNest
+{
+public:
+	Rect nest; // 巣の位置と大きさと同じ判定を持つ矩形
+	Texture frogSits; // 座っている画像 
+	bool isFrogSits; // カエルが座っているか
+
+	// カエルが座っていたら描画（IsFrogSits==true）、そうでなかったら、何も描かない
+	void Draw()
+	{
+
+	}
+
+	// プレイヤーの判定とnestをチェックしてカエルが座っていなかったら IsFrogSits=trueにして return false で抜ける
+	// そうでなかったら、return でtrue を返す（プレイヤーミス）
+	bool HitCheck(Rect playerRect)
+	{
+
+		return true; // ここがtrueならプレイヤーミス
+	}
+};
+
 void MyGame::Play()
 {
 	if (SimpleGUI::ButtonAt(U"Title", Vec2(0, Scene::Height())))
@@ -177,7 +199,7 @@ void MyGame::Play()
 	/// @brief 再生成するまでの時間を計測するタイマー
 	Stopwatch respawnTimer;
 
-	const int Up = 0, Back = 2, left = 4, right = 6;
+	const int Up = 0, Back = 2, Left = 4, Right = 6;
 	/// @brief アニメーションパターン
 	int frogPattern = Up;
 
@@ -189,7 +211,8 @@ void MyGame::Play()
 	int breakTime = 2;
 	/// @brief 死亡判定フラグ
 	bool isDead = false;
-
+	/// @brief キーボード操作のフラグ
+	bool isCtrl = true;
 
 	while (Update())
 	{
@@ -206,10 +229,10 @@ void MyGame::Play()
 		/// @brief 2 left
 		/// @brief 3 right
 		bool keysDown[4] = {
-			(KeyUp | KeyW).down(),
-			(KeyDown | KeyS).down(),
-			(KeyLeft | KeyA).down(),
-			(KeyRight | KeyD).down()
+			(KeyUp | KeyW).down() && isCtrl,
+			(KeyDown | KeyS).down() && isCtrl,
+			(KeyLeft | KeyA).down() && isCtrl,
+			(KeyRight | KeyD).down() && isCtrl
 		};
 
 		// ---------------移動-------------------
@@ -225,24 +248,24 @@ void MyGame::Play()
 
 		if (frogPattern % 2 == 0)
 		{
-			if (keysDown[0])
+			if (keysDown[Up])
 			{
 				Jumping(Up, 0, -moving);
 			}
 
-			else if (keysDown[1])
+			else if (keysDown[Back / 2])
 			{
 				Jumping(Back, 0, moving);
 			}
 
-			else if (keysDown[2])
+			else if (keysDown[Left / 2])
 			{
-				Jumping(left, -moving, 0);
+				Jumping(Left, -moving, 0);
 			}
 
-			else if (keysDown[3])
+			else if (keysDown[Right / 2])
 			{
-				Jumping(right, moving, 0);
+				Jumping(Right, moving, 0);
 			}
 		}
 
@@ -325,21 +348,21 @@ void MyGame::Play()
 			if (i.position.x > 1200) i.position.x = lowerLeft.x;
 		}
 
-		// 水没判定
+		// 水没処理
 		Rect plunkArea(0, 325, 900, 300);
 		Stopwatch plunkTimer;
 		plunkArea.draw(ColorF(Palette::Skyblue, .25));
-		// plunkAreaにあたっていて且つ移動速度が0だったら水没
 		if (frogCol.intersects(plunkArea))
 		{
-			frogPos = Vec2(4444, 4444);
+			frogPos = frogOut;
 			plunkTimer.start();
 			plunkSound.playOneShot();
 		}
-		// 2秒以上たったら初期地点へ
+
 		if (plunkTimer.sF() >= 2)
 		{
 			frogPos = FrogSpawn;
+			plunkTimer.reset();
 		}
 
 		// 丸太 -------------
@@ -458,7 +481,6 @@ void MyGame::Play()
 		{
 			// 一定時間おきにパターン変化
 			moving = 0;
-
 			// 車とぶつかったとき
 			int pattern = (int)(respawnTimer.sF() / (breakTime / 7.0));
 			auto w = deadPattern.width() / 7;
