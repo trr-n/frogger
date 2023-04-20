@@ -54,7 +54,7 @@ public:
 	/// @return 
 	static bool Update()
 	{
-		if (displayResolution.x==0)
+		if (displayResolution.x == 0)
 		{
 			displayResolution = DisplayResolution::HD_1280x720;
 			DisplaySet();	// 本当はMain()に入る直前に行いたいのだが仕方なく
@@ -67,8 +67,8 @@ public:
 			auto msec = duration_cast<std::chrono::nanoseconds>(durtion).count();
 			return msec;
 		};
-		long long sleepTime = elapset()/1000000/2;
-		System::Sleep(sleepTime);
+		long long sleepTime = elapset() / 1000000 / 2;
+		System::Sleep(int32(sleepTime));
 		while (elapset() < 1000 * 1000 * 1000 / FPS); //16
 
 		start = high_resolution_clock::now();      // 計測スタート時刻を保存
@@ -129,6 +129,6 @@ void Exit()
 bool startSysytem = { System2::Initialize() };
 
 #define System System2
-constexpr auto S3D_SYSTEM = "s3d::System を使いたい場合は、#undef System してください" ;
+constexpr auto S3D_SYSTEM = "s3d::System を使いたい場合は、#undef System してください";
 #define S3D_SYSTEM_NO_USE using System = System2;
 
