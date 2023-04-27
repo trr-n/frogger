@@ -37,6 +37,7 @@ private:
 
 	const Texture halfway{ U"stageObjects/footing.png" }; // ピンクの足場
 	const Texture goal{ U"stageObjects/goal.png" }; // ゴール
+	const Texture nest{ U"stageObjects/nest.png" }; // ゴール2
 	const Texture car0{ U"stageObjects/car1.png" }; // 車
 	const Texture car1{ U"stageObjects/car2.png" };
 	const Texture car2{ U"stageObjects/car3.png" };
@@ -73,7 +74,8 @@ private:
 	const Texture frogsLeft{ U"frogAnimations/left.png" };
 	const Texture frogsRight{ U"frogAnimations/right.png" };
 
-	const Texture frogRepo{ U"frog_repository.png" };
+	const Texture frogSitting{ U"frogAnimations/frog_repository.png" };
+	// "D:\chickenen\prgs\Scene_065\scene_0.6.5\scene_0.6.5\App\frogAnimations\frog_repository.png"
 
 	// シーンサイズxy, タイルサイズ
 	const int SceneX = 896, SceneY = 1152, Tile = 64;

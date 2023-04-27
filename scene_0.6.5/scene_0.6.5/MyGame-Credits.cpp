@@ -81,16 +81,21 @@
 
 #pragma endregion
 
-void MyGame::Credits() {
-
-	while (Update()) {
+void MyGame::Credits()
+{
+	while (Update())
+	{
 		// auto browser = textBuffer;
 
 		if (KeySpace.down())
+		{
 			ChangeScene(&MyGame::Title);
+		}
 
 		if (SimpleGUI::Button(U"Title", Vec2{ 5, 5 }))
+		{
 			ChangeScene(&MyGame::Title);
+		}
 
 		odc.resized(100, 100).drawAt(160, 430);
 		s3d.resized(75, 75).drawAt(1048, 430);

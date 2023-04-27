@@ -71,28 +71,6 @@ public:
 	}
 };
 
-class FrogNest
-{
-public:
-	Rect nest; // 巣の位置と大きさと同じ判定を持つ矩形
-	Texture frogSits; // 座っている画像 
-	bool isFrogSits; // カエルが座っているか
-
-	// カエルが座っていたら描画（IsFrogSits==true）、そうでなかったら、何も描かない
-	void Draw()
-	{
-
-	}
-
-	// プレイヤーの判定とnestをチェックしてカエルが座っていなかったら IsFrogSits=trueにして return false で抜ける
-	// そうでなかったら、return でtrue を返す（プレイヤーミス）
-	bool HitCheck(Rect playerRect)
-	{
-
-		return true; // ここがtrueならプレイヤーミス
-	}
-};
-
 void MyGame::Play()
 {
 	if (SimpleGUI::ButtonAt(U"Title", Vec2(0, Scene::Height())))
@@ -103,8 +81,7 @@ void MyGame::Play()
 	Scene::Resize(SceneX, SceneY);
 	Scene::SetBackground(Color(0, 0, 26));
 
-	TextureRegion frogAnims[8] =
-	{
+	TextureRegion frogAnims[8] = {
 		frogsForward(0, 0, Tile * 1, Tile),
 		frogsForward(Tile, 0, Tile * 2, Tile * 2),
 		frogsBack(0, 0, Tile * 1, Tile),
@@ -122,7 +99,7 @@ void MyGame::Play()
 	/// @brief かえるの速度
 	Vec2 frogVel(0, 0);
 	/// @brief ゴールの座標 
-	Vec2 goalPos(15, 220);
+	Vec2 nestPos(0, 220);
 	/// @brief 画面外待機場所
 	Vec2 frogOut(2048, 2048);
 
@@ -152,7 +129,8 @@ void MyGame::Play()
 	/// @brief 0-4: cars
 	/// @brief 5: log
 	/// @brief 6: turtle
-	Speeds speeds(1.33, 70 / 60, 1.33, 180 / 60, 65 / 60, 1.33, 60 / 60);
+	Speeds speeds(80 / 60, 70 / 60, 80 / 60, 180 / 60, 65 / 60, 80 / 60, 60 / 60);
+	//Speeds speeds(1.33, 70 / 60, 1.33, 180 / 60, 65 / 60, 1.33, 60 / 60);
 	//Speeds speeds(80, 70, 80, 180, 65, 80, 60);
 
 	Array<GameObject> cars, logs;
@@ -161,7 +139,7 @@ void MyGame::Play()
 	int carLanes[] = { 0, 0, 2, 2, 4 };
 	for (int i = 0; i < 3; i++)
 	{
-		/// @brief ランダムで車間距離を生成
+		/// @brief ランダムで車間距離を設定
 		auto spaceAdd = [&]() { return i * Random(200, 400); };
 		cars << GameObject(car0, spawnPos.rightBottom - Vec2(spaceAdd(), Tile * 0), -speeds.car0);
 		cars << GameObject(car1, spawnPos.leftBottom + Vec2(spaceAdd(), Tile * 0), speeds.car1);
@@ -220,15 +198,21 @@ void MyGame::Play()
 	bgm1.play();
 	bgm1.setVolume(bgmVolume);
 
+	FrogNest frogTest(frogSitting);
+
 	while (Update())
 	{
+		// テ巣ト
+		frogTest.Draw();
+
 #if _DEBUG
 		if (KeySpace.down())
 		{
 			sw.start();
 		}
 #endif
-		SimpleGUI::Slider(U"Volume", bgmVolume, sliderPosition);
+		// BGMの音量調節スライダー
+		//SimpleGUI::Slider(U"Volume", bgmVolume, sliderPosition);
 
 		/// @brief 移動キー
 		/// @brief 0 forward
@@ -244,7 +228,7 @@ void MyGame::Play()
 
 		// ---------------移動-------------------
 
-		/// @brief ジャンプと効果音再生
+		/// @brief ジャンプの処理
 		auto Jumping = [&](int _pattern, int _x, int _y)
 		{
 			frogPattern = _pattern + 1;
@@ -253,6 +237,7 @@ void MyGame::Play()
 			count = 0;
 		};
 
+		// 移動中じゃなかったらtrue
 		if (frogPattern % 2 == 0)
 		{
 			if (keysDown[Up])
@@ -282,26 +267,12 @@ void MyGame::Play()
 			switch (count)
 			{
 			case 0:
-				velocity *= 8;
-				break;
 			case 1:
-				velocity *= 8;
-				break;
 			case 2:
-				velocity *= 8;
-				break;
 			case 3:
-				velocity *= 8;
-				break;
 			case 4:
-				velocity *= 8;
-				break;
 			case 5:
-				velocity *= 8;
-				break;
 			case 6:
-				velocity *= 8;
-				break;
 			case 7:
 				velocity *= 8;
 				break;
@@ -321,11 +292,12 @@ void MyGame::Play()
 
 		// 画面外にでないように移動可能な範囲を限定
 		frogPos.x = std::clamp((int)frogPos.x, 0, sceneWidth);
-		frogPos.y = std::clamp((int)frogPos.y, 0, sceneHeight);
+		frogPos.y = std::clamp((int)frogPos.y, 220, sceneHeight);
 
 		Rect frogCol(frogPos.asPoint() + Point(16, 16), (frogsForward.width() / 2) - 32, frogsForward.height() - 32);
 		frogCol.draw(ColorF(Palette::Cyan, 0.25));
 
+#pragma region 当たり判定
 		// くるまの移動と当たり判定
 		for (auto& i : cars)
 		{
@@ -354,9 +326,9 @@ void MyGame::Play()
 		plunkArea.draw(ColorF(Palette::Skyblue, .25));
 		if (frogCol.intersects(plunkArea))
 		{
-			frogPos = frogOut;
+			//frogPos = frogOut;
 			plunkTimer.start();
-			plunkSound.playOneShot();
+			//plunkSound.playOneShot();
 		}
 
 		if (plunkTimer.sF() >= 2)
@@ -403,8 +375,7 @@ void MyGame::Play()
 		// ピンクの足場(中間地点) -------------
 		for (auto pinkie = 0; pinkie < Scene::Width(); pinkie += Tile)
 		{
-			Vec2 f0(pinkie, sceneHeight);
-			Vec2 f1(pinkie, sceneHeight / 2);
+			Vec2 f0(pinkie, sceneHeight), f1(pinkie, sceneHeight / 2);
 			halfway.draw(pinkie, sceneHeight);
 			halfway.draw(pinkie, 640);
 
@@ -416,32 +387,36 @@ void MyGame::Play()
 		}
 
 		// ゴールのフレーム -------------
-		Rect goalFrame(goalPos.asPoint(), 80, 50);
-		if (goalFrame.intersects(frogCol))
+		Rect nestFrame(nestPos.asPoint(), 80, 50);
+		if (nestFrame.intersects(frogCol))
 		{
 			// 音変更予定
 			squash.playOneShot();
 			frogPos = FrogSpawn;
 		}
 
-		goalFrame.draw(ColorF{ Palette::White, .25 });
+#pragma endregion
+
+#pragma region 描画
+		nestFrame.draw(ColorF{ Palette::White, .25 });
 
 		// ゴール -------------
-		for (auto goal0 = 0; goal0 < 5; goal0++)
+		for (int nest0 = 0; nest0 < 5; nest0++)
 		{
-			const int gx = 118, gy = 253;
+			// 一番左の巣の当たり判定の座標
+			const int gx = 33, gy = 250;
+			// 間隔
+			int neste = 193;
 
-			Rect goalsCol[5] = {
-				{ gx + 160 * goal0, gy, 60, 60 }
+			Rect nestsCol[5] = {
+				{ gx + neste * nest0, gy, 60, 30 }
 			};
 
-			for (auto& j : goalsCol)
+			for (auto& j : nestsCol)
 			{
-				j.draw(Palette::Red);
+				j.draw(ColorF(Palette::Red, .5));
 			}
 		}
-
-		// ---------------描画-------------------
 
 		for (auto& c : cars)
 		{
@@ -458,7 +433,7 @@ void MyGame::Play()
 			t.Draw();
 		}
 
-		goal.draw(goalPos);
+		nest.draw(nestPos);
 
 		if (sw.isRunning() && sw.sF() < 3)
 		{
@@ -490,6 +465,8 @@ void MyGame::Play()
 				respawnTimer.reset();
 			}
 		}
+#pragma endregion
+
 
 #if _DEBUG
 

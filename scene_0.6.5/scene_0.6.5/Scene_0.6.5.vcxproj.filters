@@ -800,5 +800,8 @@
     <ClInclude Include="SpawnPosition.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="FrogNest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
