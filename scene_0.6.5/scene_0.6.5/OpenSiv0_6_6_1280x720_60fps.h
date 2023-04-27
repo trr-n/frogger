@@ -50,6 +50,7 @@ public:
 		auto msec = duration_cast<std::chrono::nanoseconds>(durtion).count();
 		return true;	// ここでは最適化無視しないと怖い
 	}
+
 	/// @brief System::Update() を乗っ取り
 	/// @return 
 	static bool Update()

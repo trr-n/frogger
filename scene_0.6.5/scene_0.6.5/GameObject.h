@@ -28,17 +28,6 @@ public:
 		velocity.set($speed, 0);
 	}
 
-	/// @brief 画面外に出たら反対側に戻す
-	/// @param _limit 画面の端のX座標
-	/// @param _regen 再生成X座標
-	void Returns(int _limit, int _regen)
-	{
-		if (position.x > _limit)
-		{
-			position.x = _regen;
-		}
-	}
-
 	/// @brief 移動、更新
 	void Update()
 	{
@@ -53,16 +42,12 @@ public:
 
 	/// @brief オブジェクトに乗った瞬間の処理 / ズレ量の計算
 	/// @param _position プレイヤーの座標 ポインター
-	void RideOn(Vec2* _playerPos)
+	void Riding(Vec2* _playerPos)
 	{
 		playerPosPtr = _playerPos;
-		/*if (shift == noData)
-		{
-			shift = *_playerPos - position;
-		}*/
 	}
 
-	bool IsRideOn()
+	bool IsRiding()
 	{
 		return shift != nonData;
 	}

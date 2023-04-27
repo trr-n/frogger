@@ -214,6 +214,12 @@ void MyGame::Play()
 	/// @brief キーボード操作のフラグ
 	bool isCtrl = true;
 
+	Vec2 sliderPosition(0, 0);
+	float bgmVolume = 0;
+	// BGM再生
+	bgm1.play();
+	bgm1.setVolume(bgmVolume);
+
 	while (Update())
 	{
 #if _DEBUG
@@ -222,6 +228,7 @@ void MyGame::Play()
 			sw.start();
 		}
 #endif
+		SimpleGUI::Slider(U"Volume", bgmVolume, sliderPosition);
 
 		/// @brief 移動キー
 		/// @brief 0 forward
@@ -312,13 +319,6 @@ void MyGame::Play()
 			}
 		}
 
-		/*/// @brief リスポーン,効果音再生
-		auto PlayF = [&](Audio a)
-		{
-			a.playOneShot();
-			frogPos = FrogSpawn;
-		};*/
-
 		// 画面外にでないように移動可能な範囲を限定
 		frogPos.x = std::clamp((int)frogPos.x, 0, sceneWidth);
 		frogPos.y = std::clamp((int)frogPos.y, 0, sceneHeight);
@@ -372,12 +372,10 @@ void MyGame::Play()
 			if (logCol.intersects(frogCol))
 			{
 				log0.playerPosPtr = &frogPos;
-				log0.RideOn(&frogPos);
+				log0.Riding(&frogPos);
 				*(log0.playerPosPtr) += Vec2(1, 0);
 			}
 			log0.Update();
-
-			//log0.Returns(1200, lowerLeft.x);
 
 			if (log0.position.x > 1200)
 			{
@@ -396,7 +394,6 @@ void MyGame::Play()
 				frogPos.x -= speeds.turtle * Scene::DeltaTime();
 			}
 
-			//  
 			if (turtle0.position.x < -300)
 			{
 				turtle0.position.x = lowerRight.x;
@@ -442,10 +439,6 @@ void MyGame::Play()
 			{
 				j.draw(Palette::Red);
 			}
-
-			if (goalsCol->intersects(frogCol))
-			{
-			}
 		}
 
 		// ---------------描画-------------------
@@ -486,7 +479,7 @@ void MyGame::Play()
 			auto w = deadPattern.width() / 7;
 			deadPattern(pattern * w, 0, w, Tile).draw(frogPos);
 
-			// 溺死 未実装 ----------------------------------
+			// 溺死 未実装
 
 			// しんだら2秒間休憩
 			if (respawnTimer.sF() >= breakTime)

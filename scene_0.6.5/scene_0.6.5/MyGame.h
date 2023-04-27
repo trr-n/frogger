@@ -64,6 +64,8 @@ private:
 	const Audio jumpSound{ U"sounds/jump.mp3" };
 	const Audio plunkSound{ U"sounds/plunk.wav" };
 	const Audio timeupSound{ U"sounds/timeup.wav" };
+	const Audio bgm{ U"sounds/musics/frogger-music.mp3" };
+	const Audio bgm1{ U"sounds/musics/y2mate.com - Clarx  Zig Zag NCS Release.mp3" };
 
 	// かえるアニメーション
 	const Texture frogsForward{ U"frogAnimations/forward.png" };
