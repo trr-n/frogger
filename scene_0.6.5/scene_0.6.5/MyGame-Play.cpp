@@ -94,14 +94,14 @@ void MyGame::Play()
 
 	/// @brief かえるの生成座標、初期地点
 	const Vec2 FrogSpawn(448, 1024);
+	/// @brief 画面外待機場所
+	const Vec2 frogOut(2048, 2048);
 	/// @brief かえるの座標
 	Vec2 frogPos(FrogSpawn);
 	/// @brief かえるの速度
 	Vec2 frogVel(0, 0);
 	/// @brief ゴールの座標 
 	Vec2 nestPos(0, 220);
-	/// @brief 画面外待機場所
-	Vec2 frogOut(2048, 2048);
 
 	Vec2 upperRight(960, 576);
 	Vec2 upperLeft(-128, 512);
@@ -148,7 +148,7 @@ void MyGame::Play()
 		cars << GameObject(car4, spawnPos.rightBottom - Vec2(spaceAdd(), Tile * 4), -speeds.car4);
 	}
 
-	int logLanes[3] = { 0,2,3 };
+	int logLanes[3] = { 0, 2, 3 };
 	int logMin = 400, logMax = 700;
 	for (auto i = 0; i < 3; i++)
 	{
@@ -401,13 +401,12 @@ void MyGame::Play()
 		nestFrame.draw(ColorF{ Palette::White, .25 });
 
 		// ゴール -------------
+
+		// 一番左の巣の当たり判定の座標、間隔
+		const int gx = 33, gy = 250, neste = 193;
+
 		for (int nest0 = 0; nest0 < 5; nest0++)
 		{
-			// 一番左の巣の当たり判定の座標
-			const int gx = 33, gy = 250;
-			// 間隔
-			int neste = 193;
-
 			Rect nestsCol[5] = {
 				{ gx + neste * nest0, gy, 60, 30 }
 			};
@@ -415,6 +414,58 @@ void MyGame::Play()
 			for (auto& j : nestsCol)
 			{
 				j.draw(ColorF(Palette::Red, .5));
+			}
+
+			// ゴリ押し当たり判定
+			auto ifgoal = [&](Rect nests[], int i)
+			{
+				Stopwatch nesting;
+				if (nests[i].intersects(frogCol))
+				{
+					// かえるを画面外(待機場所)に左遷
+					frogPos = frogOut;
+					nesting.start();
+					// 左遷してから1秒以上たったら初期地点に移動
+					// タイマーリセット
+					// 座ってるかえるを描画
+					int demoting = 1;
+					if (nesting.sF() > demoting)
+					{
+						frogPos = FrogSpawn;
+						frogSitting.draw();
+						nesting.reset();
+					}
+				}
+			};
+			// ゴールしたら
+			//ifgoal(nestsCol, 1);
+			/// @brief すべての巣にかえるがいたらtrue
+			bool isSittings[5]{};
+			Stopwatch nesting;
+			if (nestsCol[0].intersects(frogCol))
+			{
+				// かえるを画面外(待機場所)に左遷
+				frogPos = frogOut;
+				isSittings[0] = true;
+				nesting.start();
+				// 左遷してからdemote秒以上たったら初期地点に移動
+				// 座ってるかえるを描画
+				// タイマーリセット
+				int demote = 2;
+				if (nesting.sF() >= demote)
+				{
+					frogPos = FrogSpawn;
+					frogSitting.draw();
+					nesting.reset();
+				}
+			}
+			// isSittingsが全部trueだったらクリア
+			for (auto& i : isSittings)
+			{
+				if (i)
+				{
+					return ChangeScene(MyGame::Title);
+				}
 			}
 		}
 

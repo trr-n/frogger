@@ -8,7 +8,7 @@ public:
 	Texture sit; // 座っている画像 
 	bool isSitting = false; // カエルが座っているか
 
-	FrogNest() {}
+	FrogNest(void);
 
 	FrogNest(Texture _sit)
 	{
