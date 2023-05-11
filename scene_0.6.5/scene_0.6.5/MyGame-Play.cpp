@@ -73,6 +73,7 @@ public:
 
 void MyGame::Play()
 {
+	Print();
 	if (SimpleGUI::ButtonAt(U"Title", Vec2(0, Scene::Height())))
 	{
 		ChangeScene(&MyGame::Title);
