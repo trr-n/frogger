@@ -6,71 +6,6 @@
 //using V2 = std::map<std::string, Vec2>;
 using str = std::string;
 
-class Turtle {
-	Rect drawregion{ 0, 0, 0, 0 };
-
-public:
-	Texture texture;
-	Stopwatch sw;
-	const int width = 64, height = 64;
-	Vec2 position, velocity;
-
-	Turtle()
-	{
-		Initialize(Texture(), Vec2::Zero());
-	}
-
-	/// @brief 亀の初期値を指定
-	/// @param texture テクスチャ
-	/// @param position 座標
-	/// @param speed 速度
-	Turtle(Texture texture, Vec2 position, int speed)
-	{
-		Initialize(texture, position);
-		velocity.set(speed, 0);
-	}
-
-	/// @brief 初期化、タイマースタート
-	/// @param texture テクスチャ
-	/// @param position 座標
-	void Initialize(Texture _texture, Vec2 _position)
-	{
-		_texture = _texture;
-		_position = _position;
-		sw.start();
-	}
-
-	/// @brief 移動、アニメーション更新
-	void Update()
-	{
-		position += velocity * Scene::DeltaTime();
-		drawregion.set(GetIndex() * width, 0, width, height);
-	}
-
-	/// @brief 描画
-	void Draw()
-	{
-		texture(drawregion).draw(position);
-	}
-
-	/// @brief 描画中の
-	/// @param totalIndex 合計アニメーションパターン数
-	/// @param animeSpan アニメーションスピード
-	/// @return 描画中
-	int GetIndex(int totalIndex = 8, int animeSpan = 500)
-	{
-		return (sw.ms() / animeSpan) % totalIndex;
-	}
-
-	/// @brief 沈んでいるかの判定
-	/// @param plunkingAnim 沈み始めるアニメーションパターン 
-	/// @return 沈んでいたら true, 浮いていたら false
-	bool IsPlunking(int plunkingAnim = 6)
-	{
-		return plunkingAnim < GetIndex();
-	}
-};
-
 void MyGame::Play()
 {
 	Print();
@@ -130,9 +65,15 @@ void MyGame::Play()
 	/// @brief 0-4: cars
 	/// @brief 5: log
 	/// @brief 6: turtle
-	Speeds speeds(80 / 60, 70 / 60, 80 / 60, 180 / 60, 65 / 60, 80 / 60, 60 / 60);
-	//Speeds speeds(1.33, 70 / 60, 1.33, 180 / 60, 65 / 60, 1.33, 60 / 60);
-	//Speeds speeds(80, 70, 80, 180, 65, 80, 60);
+	Speeds speeds(
+		80 / 60,	// 0: cars
+		70 / 60,	// 1: cars
+		80 / 60,	// 2: cars
+		180 / 60,	// 3: cars
+		65 / 60,	// 4: cars
+		80 / 60,	// 5: log
+		60 / 60		// 6: turtle
+	);
 
 	Array<GameObject> cars, logs;
 	Array<Turtle> turtles;
@@ -199,13 +140,22 @@ void MyGame::Play()
 	bgm1.play();
 	bgm1.setVolume(bgmVolume);
 
-	FrogNest frogTest(frogSitting);
+	//FrogNest frogTest(frogSitting);
+	Stopwatch nesting;
+
+	const int Y = 246;
+	FrogNest frogNests[5] = {
+		FrogNest(33, Y, Tile, Tile, frogSitting),
+		FrogNest(223, Y, Tile, Tile, frogSitting),
+		FrogNest(414, Y, Tile, Tile, frogSitting),
+		FrogNest(606, Y, Tile, Tile, frogSitting),
+		FrogNest(803, Y, Tile, Tile, frogSitting)
+	};
+
+	int score = 0;
 
 	while (Update())
 	{
-		// テ巣ト
-		frogTest.Draw();
-
 #if _DEBUG
 		if (KeySpace.down())
 		{
@@ -238,59 +188,68 @@ void MyGame::Play()
 			count = 0;
 		};
 
-		// 移動中じゃなかったらtrue
-		if (frogPattern % 2 == 0)
+		if (squash.posSec() >= squash.lengthSec() - 0.1)
 		{
-			if (keysDown[Up])
-			{
-				Jumping(Up, 0, -moving);
-			}
-
-			else if (keysDown[Back / 2])
-			{
-				Jumping(Back, 0, moving);
-			}
-
-			else if (keysDown[Left / 2])
-			{
-				Jumping(Left, -moving, 0);
-			}
-
-			else if (keysDown[Right / 2])
-			{
-				Jumping(Right, moving, 0);
-			}
+			Print << U"true";
+			FrogNest::intoNest = false;
+			frogVel = Vec2(0, 0);
 		}
 
-		// 移動時のアニメーション調整用
-		else {
-			auto velocity = frogVel;
-			switch (count)
+		while (!FrogNest::intoNest)
+		{
+			// キー入力
+			if (frogPattern % 2 == 0)
 			{
-			case 0:
-			case 1:
-			case 2:
-			case 3:
-			case 4:
-			case 5:
-			case 6:
-			case 7:
-				velocity *= 8;
-				break;
-			default:
-				_ASSERT_EXPR(false, L"error");
-				break;
-			}
+				if (keysDown[Up])
+				{
+					Jumping(Up, 0, -moving);
+				}
 
-			frogPos += velocity;
-			count++;
+				else if (keysDown[Back / 2])
+				{
+					Jumping(Back, 0, moving);
+				}
 
-			if (count > 7)
-			{
-				frogPattern -= 1;
+				else if (keysDown[Left / 2])
+				{
+					Jumping(Left, -moving, 0);
+				}
+
+				else if (keysDown[Right / 2])
+				{
+					Jumping(Right, moving, 0);
+				}
 			}
+			// 移動時のアニメーション調整用
+			else {
+				auto velocity = frogVel;
+				switch (count)
+				{
+				case 0:
+				case 1:
+				case 2:
+				case 3:
+				case 4:
+				case 5:
+				case 6:
+				case 7:
+					velocity *= 8;
+					break;
+				default:
+					_ASSERT_EXPR(false, L"error");
+					break;
+				}
+
+				frogPos += velocity;
+				count++;
+
+				if (count > 7)
+				{
+					frogPattern -= 1;
+				}
+			}
+			break;
 		}
-
 		// 画面外にでないように移動可能な範囲を限定
 		frogPos.x = std::clamp((int)frogPos.x, 0, sceneWidth);
 		frogPos.y = std::clamp((int)frogPos.y, 220, sceneHeight);
@@ -387,12 +346,28 @@ void MyGame::Play()
 			}
 		}
 
+		// 
+		for (auto& frogNest : frogNests)
+		{
+			frogNest.HitCheck(frogCol);
+		}
+		// 巣に入った瞬間ならす
+		if (FrogNest::intoNest && !squash.isPlaying())
+		{
+			score += NestPoint;
+			squash.play();
+		}
+		if (score >= 1000)
+		{
+			ChangeScene(&MyGame::Title);
+		}
+
 		// ゴールのフレーム -------------
 		Rect nestFrame(nestPos.asPoint(), 80, 50);
 		if (nestFrame.intersects(frogCol))
 		{
 			// 音変更予定
-			squash.playOneShot();
+			//squash.playOneShot();
 			frogPos = FrogSpawn;
 		}
 
@@ -417,56 +392,11 @@ void MyGame::Play()
 				j.draw(ColorF(Palette::Red, .5));
 			}
 
-			// ゴリ押し当たり判定
-			auto ifgoal = [&](Rect nests[], int i)
-			{
-				Stopwatch nesting;
-				if (nests[i].intersects(frogCol))
-				{
-					// かえるを画面外(待機場所)に左遷
-					frogPos = frogOut;
-					nesting.start();
-					// 左遷してから1秒以上たったら初期地点に移動
-					// タイマーリセット
-					// 座ってるかえるを描画
-					int demoting = 1;
-					if (nesting.sF() > demoting)
-					{
-						frogPos = FrogSpawn;
-						frogSitting.draw();
-						nesting.reset();
-					}
-				}
-			};
 			// ゴールしたら
-			//ifgoal(nestsCol, 1);
-			/// @brief すべての巣にかえるがいたらtrue
-			bool isSittings[5]{};
-			Stopwatch nesting;
-			if (nestsCol[0].intersects(frogCol))
+			if (FrogNest::intoNest)
 			{
-				// かえるを画面外(待機場所)に左遷
-				frogPos = frogOut;
-				isSittings[0] = true;
-				nesting.start();
-				// 左遷してからdemote秒以上たったら初期地点に移動
-				// 座ってるかえるを描画
-				// タイマーリセット
-				int demote = 2;
-				if (nesting.sF() >= demote)
-				{
-					frogPos = FrogSpawn;
-					frogSitting.draw();
-					nesting.reset();
-				}
-			}
-			// isSittingsが全部trueだったらクリア
-			for (auto& i : isSittings)
-			{
-				if (i)
-				{
-					return ChangeScene(MyGame::Title);
-				}
+				// かえるを初期座標にもどす
+				frogPos = FrogSpawn;
 			}
 		}
 
@@ -524,11 +454,16 @@ void MyGame::Play()
 
 		if (KeyE.pressed()) frogPos.y = 576;
 
+		for (auto& i : frogNests)
+		{
+			i.Draw();
+
+		}
+
 		font30(Cursor::Pos()).draw(0, 0, Palette::White);
 		font30(frogPos).draw(0, font30.fontSize());
 		font30(frogVel).draw(0, font30.fontSize() * 2);
-		font30().draw(0, font30.fontSize() * 3);
-
+		fontBold(score).draw(0, font30.fontSize() * 3);
 #endif
 	}
 }

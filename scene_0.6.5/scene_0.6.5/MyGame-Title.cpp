@@ -5,8 +5,7 @@ void MyGame::Title()
 	while (Update()) {
 		auto width = Scene::Width() / 2, height = Scene::Height() / 2;
 
-		auto ww = Scene::Width() - 100;
-		if (SimpleGUI::Button(U"Credit", Vec2{ ww, 5 }))
+		if (SimpleGUI::Button(U"Credit", Vec2{ Scene::Width() - 100, 5 }))
 			ChangeScene(&MyGame::Credits);
 
 		if (SimpleGUI::ButtonAt(U"Game Start", Vec2{ width, height + Tile }))

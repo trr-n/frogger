@@ -5,7 +5,9 @@
 
 # include "MyGame.h"
 # include "OpenSiv0_6_6_1280x720_60fps.h"
-# include "GameObject.h"
+# include "Point.h"
 # include "Speeds.h"
+# include "GameObject.h"
 # include "SpawnPosition.h"
 # include "FrogNest.h"
+# include "Turtle.h"
