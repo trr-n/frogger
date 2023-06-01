@@ -321,7 +321,7 @@
     <ClInclude Include="FrogNest.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="MyGame.h" />
-    <ClInclude Include="Point.h" />
+    <ClInclude Include="Score.h" />
     <ClInclude Include="SpawnPosition.h" />
     <ClInclude Include="Speeds.h" />
     <ClInclude Include="stdafx.h" />

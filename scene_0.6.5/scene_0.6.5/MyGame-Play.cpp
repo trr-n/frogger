@@ -2,7 +2,6 @@
 #include <iostream>
 #include <string>
 #include <map>
-
 //using V2 = std::map<std::string, Vec2>;
 using str = std::string;
 
@@ -151,8 +150,12 @@ void MyGame::Play()
 		FrogNest(606, Y, Tile, Tile, frogSitting),
 		FrogNest(803, Y, Tile, Tile, frogSitting)
 	};
+	/*FrogNest frogNests[5];
+	for (auto i = 0; i > 5; i++) {
+		frogNests[i] = FrogNest(33 + i * 120, Y, Tile, Tile, frogSitting);
+	}*/
 
-	int score = 0;
+	Score score = { 1, 100, 334, -10 };
 
 	while (Update())
 	{
@@ -186,6 +189,7 @@ void MyGame::Play()
 			frogVel.set(_x, _y);
 			jumpSound.playOneShot();
 			count = 0;
+			score.Add(score.jump);
 		};
 
 		if (squash.posSec() >= squash.lengthSec() - 0.1)
@@ -239,10 +243,8 @@ void MyGame::Play()
 					_ASSERT_EXPR(false, L"error");
 					break;
 				}
-
 				frogPos += velocity;
 				count++;
-
 				if (count > 7)
 				{
 					frogPattern -= 1;
@@ -289,6 +291,7 @@ void MyGame::Play()
 			//frogPos = frogOut;
 			plunkTimer.start();
 			//plunkSound.playOneShot();
+			score.Add(score.hit);
 		}
 
 		if (plunkTimer.sF() >= 2)
@@ -346,18 +349,18 @@ void MyGame::Play()
 			}
 		}
 
-		// 
-		for (auto& frogNest : frogNests)
+		for (auto& nest : frogNests)
 		{
-			frogNest.HitCheck(frogCol);
+			nest.HitCheck(frogCol);
 		}
 		// 巣に入った瞬間ならす
 		if (FrogNest::intoNest && !squash.isPlaying())
 		{
-			score += NestPoint;
+			//score += NestPoint;
+			score.Add(score.nest);
 			squash.play();
 		}
-		if (score >= 1000)
+		if (score.current >= 500)
 		{
 			ChangeScene(&MyGame::Title);
 		}
@@ -449,6 +452,7 @@ void MyGame::Play()
 		}
 #pragma endregion
 
+		fontBold(score.current).drawAt(sceneWidth / 2, fontBold.fontSize());
 
 #if _DEBUG
 
@@ -463,7 +467,6 @@ void MyGame::Play()
 		font30(Cursor::Pos()).draw(0, 0, Palette::White);
 		font30(frogPos).draw(0, font30.fontSize());
 		font30(frogVel).draw(0, font30.fontSize() * 2);
-		fontBold(score).draw(0, font30.fontSize() * 3);
 #endif
 	}
 }
