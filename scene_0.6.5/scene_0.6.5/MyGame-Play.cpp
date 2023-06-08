@@ -2,12 +2,14 @@
 #include <iostream>
 #include <string>
 #include <map>
+
 //using V2 = std::map<std::string, Vec2>;
 using str = std::string;
 
 void MyGame::Play()
 {
 	Print();
+
 	if (SimpleGUI::ButtonAt(U"Title", Vec2(0, Scene::Height())))
 	{
 		ChangeScene(&MyGame::Title);
@@ -29,12 +31,16 @@ void MyGame::Play()
 
 	/// @brief かえるの生成座標、初期地点
 	const Vec2 FrogSpawn(448, 1024);
+
 	/// @brief 画面外待機場所
 	const Vec2 frogOut(2048, 2048);
+
 	/// @brief かえるの座標
 	Vec2 frogPos(FrogSpawn);
+
 	/// @brief かえるの速度
 	Vec2 frogVel(0, 0);
+
 	/// @brief ゴールの座標 
 	Vec2 nestPos(0, 220);
 
@@ -61,9 +67,6 @@ void MyGame::Play()
 	int sceneHeight = Scene::Height() - Tile * 2;
 
 	/// @brief オブジェクトの移動速度
-	/// @brief 0-4: cars
-	/// @brief 5: log
-	/// @brief 6: turtle
 	Speeds speeds(
 		80 / 60,	// 0: cars
 		70 / 60,	// 1: cars
@@ -91,6 +94,7 @@ void MyGame::Play()
 
 	int logLanes[3] = { 0, 2, 3 };
 	int logMin = 400, logMax = 700;
+
 	for (auto i = 0; i < 3; i++)
 	{
 		logs << GameObject(
@@ -115,6 +119,7 @@ void MyGame::Play()
 	}
 
 	Stopwatch sw;
+
 	/// @brief 再生成するまでの時間を計測するタイマー
 	Stopwatch respawnTimer;
 
@@ -124,18 +129,23 @@ void MyGame::Play()
 
 	/// @brief 移動速度
 	int moving = 1;
+
 	/// @brief アニメーションパターンのカウント
 	int count = 0;
+
 	/// @brief 死んでから再度動けるようになるまでの時間
 	int breakTime = 2;
+
 	/// @brief 死亡判定フラグ
 	bool isDead = false;
+
 	/// @brief キーボード操作のフラグ
 	bool isCtrl = true;
 
 	Vec2 sliderPosition(0, 0);
+
+	// BGM
 	float bgmVolume = 0;
-	// BGM再生
 	bgm1.play();
 	bgm1.setVolume(bgmVolume);
 
@@ -186,16 +196,20 @@ void MyGame::Play()
 		auto Jumping = [&](int _pattern, int _x, int _y)
 		{
 			frogPattern = _pattern + 1;
+
 			frogVel.set(_x, _y);
+
 			jumpSound.playOneShot();
+
 			count = 0;
+
 			score.Add(score.jump);
 		};
 
 		if (squash.posSec() >= squash.lengthSec() - 0.1)
 		{
-			Print << U"true";
 			FrogNest::intoNest = false;
+
 			frogVel = Vec2(0, 0);
 		}
 
@@ -224,9 +238,12 @@ void MyGame::Play()
 					Jumping(Right, moving, 0);
 				}
 			}
+
 			// 移動時のアニメーション調整用
-			else {
+			else
+			{
 				auto velocity = frogVel;
+
 				switch (count)
 				{
 				case 0:
@@ -239,19 +256,25 @@ void MyGame::Play()
 				case 7:
 					velocity *= 8;
 					break;
+
 				default:
 					_ASSERT_EXPR(false, L"error");
 					break;
 				}
+
 				frogPos += velocity;
+
 				count++;
+
 				if (count > 7)
 				{
 					frogPattern -= 1;
 				}
 			}
+
 			break;
 		}
+
 		// 画面外にでないように移動可能な範囲を限定
 		frogPos.x = std::clamp((int)frogPos.x, 0, sceneWidth);
 		frogPos.y = std::clamp((int)frogPos.y, 220, sceneHeight);
@@ -270,7 +293,9 @@ void MyGame::Play()
 			if (obsCol.intersects(frogCol) && !isDead)
 			{
 				squash.playOneShot();
+
 				isDead = true;
+
 				if (isDead)
 				{
 					respawnTimer.start();
@@ -437,6 +462,7 @@ void MyGame::Play()
 			// 車とぶつかったとき
 			int pattern = (int)(respawnTimer.sF() / (breakTime / 7.0));
 			auto w = deadPattern.width() / 7;
+
 			deadPattern(pattern * w, 0, w, Tile).draw(frogPos);
 
 			// 溺死 未実装
@@ -452,20 +478,24 @@ void MyGame::Play()
 		}
 #pragma endregion
 
-		fontBold(score.current).drawAt(sceneWidth / 2, fontBold.fontSize());
+		fontBold(score.current).drawAt(double(sceneWidth / 2), fontBold.fontSize());
 
 #if _DEBUG
 
-		if (KeyE.pressed()) frogPos.y = 576;
+		if (KeyE.pressed())
+		{
+			frogPos.y = 576;
+		}
 
 		for (auto& i : frogNests)
 		{
 			i.Draw();
-
 		}
 
 		font30(Cursor::Pos()).draw(0, 0, Palette::White);
+
 		font30(frogPos).draw(0, font30.fontSize());
+
 		font30(frogVel).draw(0, font30.fontSize() * 2);
 #endif
 	}

@@ -3,6 +3,7 @@
 # include <Siv3D.hpp>
 //# include "0_6_6_1280x720_60fps.h"
 
+# include "General.h"
 # include "MyGame.h"
 # include "OpenSiv0_6_6_1280x720_60fps.h"
 # include "Score.h"

@@ -319,6 +319,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FrogNest.h" />
+    <ClInclude Include="General.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="MyGame.h" />
     <ClInclude Include="Score.h" />
