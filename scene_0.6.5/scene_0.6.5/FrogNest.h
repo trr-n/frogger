@@ -8,6 +8,7 @@ public:
 	Texture sit; // 座っている画像 
 	bool isSitting = false; // カエルが座っているか
 	inline static bool intoNest = false; // かえるが巣にはいった
+	bool intoNestSelf = false;
 
 	FrogNest(void);
 
@@ -49,6 +50,7 @@ public:
 		if (hit && !isSitting)
 		{
 			isSitting = true; // かえるを座らせた
+			intoNestSelf = true; // 巣一つ分のフラグ
 			intoNest = true; // 巣にはいった
 			return false; // ぶつかってないから false
 		}

@@ -115,6 +115,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="MyGame-Clear.cpp" />
     <ClCompile Include="MyGame-Credits.cpp" />
     <ClCompile Include="MyGame-System.cpp" />
     <ClCompile Include="MyGame-Title.cpp" />

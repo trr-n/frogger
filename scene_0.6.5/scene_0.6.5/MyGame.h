@@ -27,14 +27,16 @@ private:
 	void Title();
 	void Play();
 	void Credits();
+	void Clear();
 	// void GameOver();
 	// void Ranking();
-	// void Ending();
 
 	// 通常のフォントを作成 MyGameクラス内ならどこでも使える（例：Main()内では、MyGameクラス外なので使えない）
 	const Font font30{ 30 };
 	const Font font60{ 60 };
 	const Font fontBold{ 50, Typeface::Regular, FontStyle::Bold };
+
+	const String BubbleManTTF_path = U"fonts/BubbleMan.ttf";
 
 	const Texture halfway{ U"stageObjects/footing.png" }; // ピンクの足場
 	const Texture goal{ U"stageObjects/goal.png" }; // ゴール

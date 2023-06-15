@@ -2,19 +2,30 @@
 class General
 {
 public:
-	// どこでも使える
-	inline static int x;
+	General(void);
 
-	inline static int currentScore;
-	inline static int highScore;
-
-	inline static float timer;
+	inline static int FinalPoint;
+	inline static int FinalTime;
+	inline static void SetFinalScores(int point, int time)
+	{
+		FinalPoint = point;
+		FinalTime = time;
+	}
 
 	inline static void Initialize()
 	{
-		timer = 0;
-		currentScore = 0;
-		highScore = 0;
+		FinalPoint = 0;
+		FinalTime = 0;
+	}
+
+	inline static Font FontSetting(int size, Typeface type = Typeface::Regular, FontStyle style = FontStyle::Default)
+	{
+		return Font(size, type, style);
+	}
+
+	inline static Font FontSetting(int size, String path)
+	{
+		return Font(size, path);
 	}
 };
 

@@ -24,6 +24,12 @@ public:
 		current += amount;
 	}
 
+	void Final(double time)
+	{
+		General::FinalPoint = current;
+		General::FinalTime = time;
+	}
+
 	//int Current()
 	//{
 		//return current;
