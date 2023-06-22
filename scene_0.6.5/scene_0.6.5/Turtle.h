@@ -9,39 +9,28 @@ public:
 	const int width = 64, height = 64;
 	Vec2 position, velocity;
 
-	Turtle()
-	{
-		Initialize(Texture(), Vec2::Zero());
-	}
+	Vec2* playerPosPtr;
+	Vec2  noData = { 0,0 };
+	Vec2& playerPos = noData;
+	const Vec2 nonData = { 1280, 1280 };
+	Vec2 shift = noData;
 
-	/// @brief 亀の初期値を指定
-	/// @param texture テクスチャ
-	/// @param position 座標
-	/// @param speed 速度
-	Turtle(Texture texture, Vec2 position, int speed)
-	{
-		Initialize(texture, position);
-		velocity.set(speed, 0);
-	}
+	Turtle() :playerPosPtr(nullptr), position(0, 0), velocity(0, 0) {}
 
-	/// @brief 初期化、タイマースタート
-	/// @param texture テクスチャ
-	/// @param position 座標
-	void Initialize(Texture _texture, Vec2 _position)
+	Turtle(Texture texture, Vec2 position, int _speed)
 	{
-		_texture = _texture;
-		_position = _position;
+		this->texture = texture;
+		this->position = position;
+		velocity.set(_speed, 0);
 		sw.start();
 	}
 
-	/// @brief 移動、アニメーション更新
 	void Update()
 	{
-		position += velocity * Scene::DeltaTime();
+		position += velocity; // *Scene::DeltaTime();
 		drawregion.set(GetIndex() * width, 0, width, height);
 	}
 
-	/// @brief 描画
 	void Draw()
 	{
 		texture(drawregion).draw(position);
@@ -57,11 +46,20 @@ public:
 	}
 
 	/// @brief 沈んでいるかの判定
-	/// @param plunkingAnim 沈み始めるアニメーションパターン 
+	/// @param plunkingAnim 沈み始めのアニメーションパターン 
 	/// @return 沈んでいたら true, 浮いていたら false
 	bool IsPlunking(int plunkingAnim = 6)
 	{
 		return plunkingAnim < GetIndex();
+	}
+	void Riding(Vec2* _playerPos)
+	{
+		playerPosPtr = _playerPos;
+	}
+
+	bool IsRiding()
+	{
+		return shift != nonData;
 	}
 };
 

@@ -11,7 +11,6 @@ public:
 	Vec2 noData = { 0, 0 };
 	Vec2& playerPos = noData;
 	const Vec2 nonData = { 1280, 1280 };
-	/// @brief 丸太の左上からズレてる量
 	Vec2 shift = nonData;
 
 	GameObject() :playerPosPtr(nullptr), position(0, 0), velocity(0, 0)
@@ -47,10 +46,10 @@ public:
 		playerPosPtr = _playerPos;
 	}
 
-	bool IsRiding()
+	/*bool IsRiding()
 	{
 		return shift != nonData;
-	}
+	}*/
 
 	/// @brief 描画
 	void Draw()

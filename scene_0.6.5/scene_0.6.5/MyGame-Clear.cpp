@@ -9,5 +9,8 @@ void MyGame::Clear()
 	{
 		Scene::SetBackground(Palette::Black);
 		scoresFont(U"Your Record\nScore: {}\nTime: {}"_fmt(General::FinalPoint, General::FinalTime)).drawAt(Scene::Center());
+		fontBold(U"Press any key").drawAt(Scene::Width(), Scene::Height());
+		//if (Controller::Button(B::Down))
+			//ChangeScene(&MyGame::Title);
 	}
 }

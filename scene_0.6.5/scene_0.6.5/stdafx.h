@@ -8,6 +8,7 @@
 # include "OpenSiv0_6_6_1280x720_60fps.h"
 # include "Score.h"
 # include "Speeds.h"
+# include "Controller.h"
 # include "GameObject.h"
 # include "SpawnPosition.h"
 # include "FrogNest.h"

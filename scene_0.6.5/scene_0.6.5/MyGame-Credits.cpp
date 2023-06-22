@@ -126,6 +126,8 @@ void MyGame::Credits()
 		if (gt.leftClicked())
 			system("start chrome.exe https://www.bf-lessson.com/1062");
 
+#if _DEBUG
 		font30(Cursor::Pos()).draw(0, font30.fontSize(), Palette::Black);
+#endif
 	}
 }
