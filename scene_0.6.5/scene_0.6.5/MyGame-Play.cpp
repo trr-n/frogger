@@ -57,11 +57,11 @@ void MyGame::Play()
 
 	Array<Turtle> turtles;
 	int turtleLanes[] = { 0, 2 };
-	for (auto i = 0; i < 3; i++)
+	//for (auto i = 0; i < 3; i++)
 	{
 		for (auto j = 0; j < 3; j++)
 		{
-			turtles << Turtle(turtleAnims, spawnPos.rightUp - Vec2(Tile * j, Tile * turtleLanes[0]), -speeds.turtle);
+			turtles << Turtle(turtleAnims, spawnPos.rightUp - Vec2(Tile * j + Random(300, 500), Tile * turtleLanes[0]), -speeds.turtle);
 			turtles << Turtle(turtleAnims, spawnPos.rightUp - Vec2(Tile * j, Tile * turtleLanes[1]), -speeds.turtle);
 		}
 	}
@@ -75,7 +75,7 @@ void MyGame::Play()
 	int count = 0;
 	int breakTime = 2;
 	bool isDead = false;
-	bool isCtrl = true;
+	//bool isCtrl = true;
 	float bgmVolume = 0;
 	bgm1.play();
 	bgm1.setVolume(bgmVolume);
@@ -118,7 +118,7 @@ void MyGame::Play()
 
 		while (!FrogNest::intoNest)
 		{
-			if (frogPattern % 2 == 0 && isCtrl)
+			if (frogPattern % 2 == 0 /*&& isCtrl*/)
 			{
 				auto pad = Controller(0);
 				pad.Update(Type::Down);
@@ -337,7 +337,6 @@ void MyGame::Play()
 		font30(Cursor::Pos()).draw(0, 0, Palette::White);
 		font30(frogPos).draw(0, font30.fontSize());
 		font30(frogVel).draw(0, font30.fontSize() * 2);
-		font30(U"LStick: {}"_fmt(Controller(0).LStick())).draw(0, font30.fontSize() * 3);
 #endif
 	}
 }
